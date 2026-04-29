@@ -9,6 +9,7 @@ import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { Users, Copy, Share2, TrendingUp, Gift } from 'lucide-react';
 import { formatCurrency } from '../lib/utils';
+import { handleFirestoreError, OperationType } from '../lib/errorHandlers';
 
 export const ReferralPage: React.FC = () => {
   const { userData } = useAuth();
@@ -22,12 +23,12 @@ export const ReferralPage: React.FC = () => {
     // Fetch referral bonus
     getDoc(doc(db, 'settings', 'global')).then(snap => {
       if (snap.exists()) setBonus(snap.data().referralBonus || 2000);
-    });
+    }).catch(err => handleFirestoreError(err, OperationType.GET, 'settings/global'));
 
-    const q = query(collection(db, 'users'), where('referredBy', '==', userData.referralCode.toUpperCase()));
+    const q = query(collection(db, 'users'), where('referredByUid', '==', userData.uid));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setReferrals(snapshot.docs.map(doc => doc.data()));
-    });
+    }, (err) => handleFirestoreError(err, OperationType.LIST, 'users/referrals'));
 
     return () => unsubscribe();
   }, [userData]);

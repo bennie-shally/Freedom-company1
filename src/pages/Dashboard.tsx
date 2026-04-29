@@ -48,6 +48,23 @@ export const Dashboard: React.FC = () => {
     return () => unsubscribe();
   }, [user]);
 
+  useEffect(() => {
+    if (!activeInvestments.length) return;
+
+    // Periodic check for maturation while user is on page
+    const interval = setInterval(() => {
+      const now = new Date();
+      activeInvestments.forEach(inv => {
+        const endTime = inv.endsAt?.toDate?.() || new Date(inv.endsAt);
+        if (inv.status === 'running' && endTime <= now) {
+          completeInvestment(inv);
+        }
+      });
+    }, 10000); // Check every 10 seconds
+
+    return () => clearInterval(interval);
+  }, [activeInvestments]);
+
   if (!user || !userData) {
     return (
       <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center gap-6">
@@ -58,6 +75,7 @@ export const Dashboard: React.FC = () => {
   }
 
   const completeInvestment = async (inv: Investment) => {
+    if (inv.status !== 'running') return;
     try {
       const batch = writeBatch(db);
       
@@ -74,8 +92,9 @@ export const Dashboard: React.FC = () => {
 
       await batch.commit();
       console.log(`Investment ${inv.id} completed and credited.`);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error completing investment:', err);
+      handleFirestoreError(err, OperationType.WRITE, 'investments/completion');
     }
   };
 

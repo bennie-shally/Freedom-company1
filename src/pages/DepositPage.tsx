@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { Wallet, Copy, Upload, CheckCircle2, AlertCircle } from 'lucide-react';
 import { formatCurrency } from '../lib/utils';
 import { SystemSettings } from '../types';
+import { handleFirestoreError, OperationType } from '../lib/errorHandlers';
 
 export const DepositPage: React.FC = () => {
   const { user, userData } = useAuth();
@@ -25,21 +26,25 @@ export const DepositPage: React.FC = () => {
 
   useEffect(() => {
     const fetchSettings = async () => {
-      const snap = await getDoc(doc(db, 'settings', 'global'));
-      if (snap.exists()) {
-        setSettings(snap.data() as SystemSettings);
-      } else {
-        // Fallback or default
-        setSettings({
-          gcashName: 'Freedom Admin',
-          gcashNumber: '09123456789',
-          withdrawalFeePercent: 10,
-          minWithdrawal: 1000,
-          maxWithdrawal: 100000,
-          referralBonus: 2000,
-          whatsappAdmin: 'https://wa.me/1234567890',
-          whatsappGroup: 'https://chat.whatsapp.com/...'
-        });
+      try {
+          const snap = await getDoc(doc(db, 'settings', 'global'));
+          if (snap.exists()) {
+            setSettings(snap.data() as SystemSettings);
+          } else {
+            // Fallback or default
+            setSettings({
+              gcashName: 'Freedom Admin',
+              gcashNumber: '09123456789',
+              withdrawalFeePercent: 10,
+              minWithdrawal: 1000,
+              maxWithdrawal: 100000,
+              referralBonus: 2000,
+              whatsappAdmin: 'https://wa.me/1234567890',
+              whatsappGroup: 'https://chat.whatsapp.com/...'
+            });
+          }
+      } catch (err: any) {
+          handleFirestoreError(err, OperationType.GET, 'settings/global');
       }
     };
     fetchSettings();
@@ -77,8 +82,9 @@ export const DepositPage: React.FC = () => {
 
       setStatus('success');
       setTimeout(() => navigate('/dashboard'), 2000);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Deposit error:', err);
+      handleFirestoreError(err, OperationType.WRITE, 'deposits');
       setStatus('error');
     } finally {
       setLoading(false);

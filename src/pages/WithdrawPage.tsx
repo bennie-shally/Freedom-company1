@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { Wallet, CircleChevronUp, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { formatCurrency } from '../lib/utils';
 import { SystemSettings } from '../types';
+import { handleFirestoreError, OperationType } from '../lib/errorHandlers';
 
 export const WithdrawPage: React.FC = () => {
   const { user, userData } = useAuth();
@@ -40,7 +41,7 @@ export const WithdrawPage: React.FC = () => {
 
   const { fee, net } = calculateTotal();
 
-  const handleWithdraw = async (e: React.FormEvent) => {
+    const handleWithdraw = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !userData || !amount || !bankDetails || !settings) return;
 
@@ -77,8 +78,9 @@ export const WithdrawPage: React.FC = () => {
 
       setStatus('success');
       setTimeout(() => navigate('/dashboard'), 2000);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Withdrawal error:', err);
+      handleFirestoreError(err, OperationType.WRITE, 'withdrawals');
       setStatus('error');
     } finally {
       setLoading(false);

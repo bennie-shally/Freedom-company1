@@ -18,8 +18,7 @@ service cloud.firestore {
 
     function isAdmin() {
       return isSignedIn() && (
-        request.auth.token.email == 'benjamingeorge230@gmail.com' ||
-        request.auth.token.email == 'investorben109@gmail.com' ||
+        request.auth.token.email == 'btechtools.ng@gmail.com' ||
         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
       );
@@ -44,8 +43,8 @@ service cloud.firestore {
     // --- Schemas ---
     function isValidUser(data) {
       return data.uid == request.auth.uid 
-        && data.username is string && data.username.size() <= 100
-        && data.balance is number
+        && data.username is string
+        && data.email is string
         && data.role in ['user', 'admin'];
     }
 
@@ -72,7 +71,7 @@ service cloud.firestore {
       return data.name is string && data.name.size() > 0 && data.name.size() <= 100
         && data.minAmount is number && data.minAmount >= 0
         && data.maxAmount is number && data.maxAmount >= data.minAmount
-        && data.profitPercent is number && data.profitPercent > 0
+        && (data.profitPercent is number || data.returnPercent is number)
         && (
           (data.durationHours is number && data.durationHours > 0) ||
           (data.durationDays is number && data.durationDays > 0)
@@ -83,12 +82,13 @@ service cloud.firestore {
 
     // Users
     match /users/{userId} {
-      allow read: if isOwner(userId) || isAdmin() || (isSignedIn() && resource.data.referralCode != null);
+      // Allow reading single user, admin read all, or anyone checking their own profile
+      allow get: if isOwner(userId) || isAdmin();
       allow list: if isAdmin() || (isSignedIn() && (
-        resource.data.referredBy == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.referralCode ||
+        resource.data.referredByUid == request.auth.uid ||
         request.query.limit == 1
       ));
-      allow create: if isOwner(userId) && incoming().role == 'user' && (!('balance' in incoming()) || incoming().balance == 0);
+      allow create: if isOwner(userId) && isValidUser(incoming()) && incoming().role == 'user' && incoming().balance == 0;
       allow update: if (isAdmin() && incoming().diff(existing()).affectedKeys().hasAny(['balance', 'totalEarnings', 'role', 'status'])) || (
         isOwner(userId) && 
         incoming().diff(existing()).affectedKeys().hasOnly(['username', 'balance', 'totalEarnings', 'phoneNumber'])

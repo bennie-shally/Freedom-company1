@@ -12,6 +12,7 @@ import { motion } from 'motion/react';
 import { Shield, ArrowRight, Wallet, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { InvestmentPlan } from '../types';
+import { handleFirestoreError, OperationType } from '../lib/errorHandlers';
 
 export const PlansPage: React.FC = () => {
   const { userData, user } = useAuth();
@@ -24,19 +25,23 @@ export const PlansPage: React.FC = () => {
   useEffect(() => {
     // Optionally fetch dynamic plans from admin settings
     const fetchPlans = async () => {
-      const snap = await getDocs(collection(db, 'investment_plans'));
-      if (!snap.empty) {
-        setPlans(snap.docs.map(doc => {
-          const data = doc.data();
-          return { 
-            id: doc.id, 
-            ...data,
-            // Ensure compatibility with different property names
-            profitPercent: data.profitPercent || data.returnPercent || 0 
-          } as InvestmentPlan;
-        }));
-      } else {
-        setPlans([]); // Ensure empty array if no plans found
+      try {
+          const snap = await getDocs(collection(db, 'investment_plans'));
+          if (!snap.empty) {
+            setPlans(snap.docs.map(doc => {
+              const data = doc.data();
+              return { 
+                id: doc.id, 
+                ...data,
+                // Ensure compatibility with different property names
+                profitPercent: data.profitPercent || data.returnPercent || 0 
+              } as InvestmentPlan;
+            }));
+          } else {
+            setPlans([]); // Ensure empty array if no plans found
+          }
+      } catch (err: any) {
+          handleFirestoreError(err, OperationType.LIST, 'investment_plans');
       }
     };
     fetchPlans();
@@ -58,7 +63,12 @@ export const PlansPage: React.FC = () => {
       const profit = Math.floor((amount * profitPercent) / 100);
       const totalReturn = amount + profit;
       const startedAt = new Date();
-      const endsAt = new Date(startedAt.getTime() + plan.durationHours * 60 * 60 * 1000);
+      
+      let durationMs = 0;
+      if (plan.durationHours) durationMs = plan.durationHours * 60 * 60 * 1000;
+      else if (plan.durationDays) durationMs = plan.durationDays * 24 * 60 * 60 * 1000;
+      
+      const endsAt = new Date(startedAt.getTime() + durationMs);
 
       // Create investment record
       await addDoc(collection(db, 'investments'), {
@@ -79,8 +89,9 @@ export const PlansPage: React.FC = () => {
       });
 
       navigate('/dashboard');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Investment error:', err);
+      handleFirestoreError(err, OperationType.WRITE, 'investments');
       alert('Failed to process investment. Please try again.');
     } finally {
       setLoading(false);

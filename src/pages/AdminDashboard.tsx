@@ -32,10 +32,22 @@ export const AdminDashboard: React.FC = () => {
   useEffect(() => {
     if (loading) return;
     
+    // Auto-authenticate if logged in as the specific admin email
+    if (user?.email === 'btechtools.ng@gmail.com') {
+      sessionStorage.setItem('isAdminAuthenticated', 'true');
+      setAuthenticated(true);
+      return;
+    }
+
     const isAdminAuth = sessionStorage.getItem('isAdminAuthenticated') === 'true';
     
     if (!isAdminAuth) {
-      navigate('/admin/login', { replace: true });
+      if (user) {
+        // If logged in but not admin email, definitely no access
+        navigate('/landing');
+      } else {
+        navigate('/admin/login', { replace: true });
+      }
     } else if (user) {
       setAuthenticated(true);
     }
@@ -414,9 +426,13 @@ const AdminUsers = () => {
     return onSnapshot(q, s => setUsers(s.docs.map(d => ({id: d.id, ...d.data()}))), (err) => handleFirestoreError(err, OperationType.LIST, 'users'));
   }, []);
 
-  const adjustBalance = async (uid: string, amount: number) => {
-    await updateDoc(doc(db, 'users', uid), { balance: increment(amount) });
-  };
+    const adjustBalance = async (uid: string, amount: number) => {
+        try {
+            await updateDoc(doc(db, 'users', uid), { balance: increment(amount) });
+        } catch (err: any) {
+            handleFirestoreError(err, OperationType.WRITE, `users/${uid}`);
+        }
+    };
 
   return (
     <div className="flex flex-col gap-8">
@@ -473,12 +489,16 @@ const AdminDeposits = () => {
   }, []);
 
   const handleAction = async (dep: any, action: 'approved' | 'rejected') => {
-    const batch = writeBatch(db);
-    batch.update(doc(db, 'deposits', dep.id), { status: action, reviewedAt: serverTimestamp() });
-    if (action === 'approved') {
-      batch.update(doc(db, 'users', dep.userId), { balance: increment(dep.amount) });
+    try {
+        const batch = writeBatch(db);
+        batch.update(doc(db, 'deposits', dep.id), { status: action, reviewedAt: serverTimestamp() });
+        if (action === 'approved') {
+          batch.update(doc(db, 'users', dep.userId), { balance: increment(dep.amount) });
+        }
+        await batch.commit();
+    } catch (err: any) {
+        handleFirestoreError(err, OperationType.WRITE, 'deposits/batch');
     }
-    await batch.commit();
   };
 
   return (
@@ -535,13 +555,17 @@ const AdminWithdrawals = () => {
     }, []);
 
     const handleAction = async (wit: any, action: 'approved' | 'rejected') => {
-      const batch = writeBatch(db);
-      batch.update(doc(db, 'withdrawals', wit.id), { status: action });
-      // If rejected, refund the balance (already deducted on request)
-      if (action === 'rejected') {
-        batch.update(doc(db, 'users', wit.userId), { balance: increment(wit.amount) });
+      try {
+          const batch = writeBatch(db);
+          batch.update(doc(db, 'withdrawals', wit.id), { status: action });
+          // If rejected, refund the balance (already deducted on request)
+          if (action === 'rejected') {
+            batch.update(doc(db, 'users', wit.userId), { balance: increment(wit.amount) });
+          }
+          await batch.commit();
+      } catch (err: any) {
+          handleFirestoreError(err, OperationType.WRITE, 'withdrawals/batch');
       }
-      await batch.commit();
     };
 
     return (

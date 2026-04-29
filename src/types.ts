@@ -11,6 +11,7 @@ export interface UserData {
   totalEarnings: number;
   referralCode: string;
   referredBy?: string;
+  referredByUid?: string | null;
   role: 'user' | 'admin';
   createdAt: any;
 }
@@ -67,5 +68,6 @@ export interface InvestmentPlan {
   minAmount: number;
   maxAmount: number;
   profitPercent: number;
-  durationHours: number;
+  durationHours?: number;
+  durationDays?: number;
 }

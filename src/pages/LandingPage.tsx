@@ -58,10 +58,10 @@ export const LandingPage: React.FC = () => {
             Vercel Powered Security
           </div>
           <h1 className="text-5xl font-black tracking-tighter leading-[0.95] text-white">
-            Freedom <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">Wealth</span> Ecosystem
+            Freedom <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">Company</span> Ecosystem
           </h1>
           <p className="text-slate-400 max-w-xs mx-auto text-sm leading-relaxed font-medium">
-            The Philippines' most trusted investment platform. Experience seamless cycles with instant GCash integration.
+            The Philippines' most trusted investment platform. Experience seamless cycles with instant GCash integration and secure payouts.
           </p>
           <div className="flex flex-col w-full max-w-sm gap-4">
             <Link 
