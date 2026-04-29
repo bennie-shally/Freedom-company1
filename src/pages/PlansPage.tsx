@@ -13,15 +13,9 @@ import { Shield, ArrowRight, Wallet, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { InvestmentPlan } from '../types';
 
-const defaultPlans: InvestmentPlan[] = [
-  { id: '1', name: 'Freedom Starter', minAmount: 5000, maxAmount: 10000, profitPercent: 50, durationHours: 8 },
-  { id: '2', name: 'Freedom Pro', minAmount: 15000, maxAmount: 25000, profitPercent: 75, durationHours: 8 },
-  { id: '3', name: 'Freedom Elite', minAmount: 30000, maxAmount: 50000, profitPercent: 100, durationHours: 8 },
-];
-
 export const PlansPage: React.FC = () => {
   const { userData, user } = useAuth();
-  const [plans, setPlans] = useState<InvestmentPlan[]>(defaultPlans);
+  const [plans, setPlans] = useState<InvestmentPlan[]>([]);
   const [investAmount, setInvestAmount] = useState<number>(0);
   const [selectedPlan, setSelectedPlan] = useState<InvestmentPlan | null>(null);
   const [loading, setLoading] = useState(false);
@@ -32,7 +26,17 @@ export const PlansPage: React.FC = () => {
     const fetchPlans = async () => {
       const snap = await getDocs(collection(db, 'investment_plans'));
       if (!snap.empty) {
-        setPlans(snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as InvestmentPlan)));
+        setPlans(snap.docs.map(doc => {
+          const data = doc.data();
+          return { 
+            id: doc.id, 
+            ...data,
+            // Ensure compatibility with different property names
+            profitPercent: data.profitPercent || data.returnPercent || 0 
+          } as InvestmentPlan;
+        }));
+      } else {
+        setPlans([]); // Ensure empty array if no plans found
       }
     };
     fetchPlans();
@@ -49,8 +53,9 @@ export const PlansPage: React.FC = () => {
 
     setLoading(true);
     try {
-      const amount = plan.minAmount; // Simplification: always invest min for now or add an input
-      const profit = (amount * plan.profitPercent) / 100;
+      const amount = plan.minAmount;
+      const profitPercent = plan.profitPercent || 0;
+      const profit = Math.floor((amount * profitPercent) / 100);
       const totalReturn = amount + profit;
       const startedAt = new Date();
       const endsAt = new Date(startedAt.getTime() + plan.durationHours * 60 * 60 * 1000);
@@ -60,8 +65,8 @@ export const PlansPage: React.FC = () => {
         userId: user.uid,
         planName: plan.name,
         amount,
-        profit,
-        totalReturn,
+        profit: isNaN(profit) ? 0 : profit,
+        totalReturn: isNaN(totalReturn) ? 0 : totalReturn,
         startedAt: serverTimestamp(),
         createdAt: serverTimestamp(), // Added for consistency in history
         endsAt: endsAt,

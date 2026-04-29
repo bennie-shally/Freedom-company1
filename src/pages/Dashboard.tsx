@@ -68,8 +68,8 @@ export const Dashboard: React.FC = () => {
 
       // Credit user balance and total earnings
       batch.update(doc(db, 'users', inv.userId), {
-        balance: increment(inv.totalReturn),
-        totalEarnings: increment(inv.profit)
+        balance: increment(isNaN(inv.totalReturn) ? 0 : inv.totalReturn),
+        totalEarnings: increment(isNaN(inv.profit) ? 0 : inv.profit)
       });
 
       await batch.commit();

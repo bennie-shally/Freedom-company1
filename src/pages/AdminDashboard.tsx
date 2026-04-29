@@ -180,8 +180,8 @@ const AdminPlans = () => {
     const [isAdding, setIsAdding] = useState(false);
     const [editingPlan, setEditingPlan] = useState<any>(null);
     const [formData, setFormData] = useState({
-      name: '', minAmount: 100, maxAmount: 1000, 
-      returnPercent: 10, durationHours: 8, description: ''
+      name: '', minAmount: 300, maxAmount: 5000, 
+      profitPercent: 50, durationHours: 8, description: ''
     });
 
     useEffect(() => {
@@ -192,25 +192,36 @@ const AdminPlans = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
+            const dataToSave = {
+              ...formData,
+              returnPercent: formData.profitPercent // Sync for rules
+            };
             if (editingPlan) {
-                await updateDoc(doc(db, 'investment_plans', editingPlan.id), formData);
+                await updateDoc(doc(db, 'investment_plans', editingPlan.id), dataToSave);
             } else {
-                await addDoc(collection(db, 'investment_plans'), formData);
+                await addDoc(collection(db, 'investment_plans'), dataToSave);
             }
             setIsAdding(false);
             setEditingPlan(null);
-            setFormData({ name: '', minAmount: 100, maxAmount: 1000, returnPercent: 10, durationHours: 8, description: '' });
+            setFormData({ name: '', minAmount: 300, maxAmount: 5000, profitPercent: 50, durationHours: 8, description: '' });
         } catch (err: any) {
             handleFirestoreError(err, OperationType.WRITE, 'investment_plans');
         }
     };
 
     const deletePlan = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this plan?')) return;
+        // Use a standard non-blocking confirm if window.confirm is quirky
+        const confirmed = window.confirm('RECOVERY ALERT: Are you sure you want to permanently delete this Matrix Node? This action is irreversible.');
+        if (!confirmed) return;
+        
         try {
+            console.log("Attempting to delete plan:", id);
             await deleteDoc(doc(db, 'investment_plans', id));
+            console.log("Plan deleted successfully");
         } catch (err: any) {
-            handleFirestoreError(err, OperationType.DELETE, 'investment_plans');
+            console.error("Critical Failure: Delete operation rejected by cloud node.", err);
+            handleFirestoreError(err, OperationType.DELETE, `investment_plans/${id}`);
+            alert(`OPERATIONAL ERROR: ${err.message || 'Access Denied. Check System Rules.'}`);
         }
     };
 
@@ -227,45 +238,71 @@ const AdminPlans = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {plans.map(p => (
-                    <div key={p.id} className="bg-brand-muted/50 border border-white/5 rounded-[32px] p-8 flex flex-col gap-6 relative group">
-                        <div className="flex justify-between items-start">
-                            <div className="flex flex-col">
-                                <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Plan Name</span>
-                                <h4 className="text-xl font-black text-white">{p.name}</h4>
-                            </div>
-                            <div className="flex gap-2">
-                                <button 
-                                    onClick={() => { setEditingPlan(p); setFormData(p); setIsAdding(true); }}
-                                    className="p-2 bg-white/5 hover:bg-brand-primary hover:text-black rounded-lg transition-all"
-                                >
-                                    <Settings className="w-4 h-4" />
-                                </button>
-                                <button 
-                                    onClick={() => deletePlan(p.id)}
-                                    className="p-2 bg-white/5 hover:bg-red-500 hover:text-white rounded-lg transition-all"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="flex flex-col">
-                                <span className="text-[9px] text-gray-500 uppercase font-bold">Min-Max</span>
-                                <span className="font-mono text-sm">{formatCurrency(p.minAmount)} - {formatCurrency(p.maxAmount)}</span>
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="text-[9px] text-gray-500 uppercase font-bold">Duration</span>
-                                <span className="font-mono text-sm">{p.durationHours || p.durationDays} Hours</span>
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="text-[9px] text-brand-primary uppercase font-bold">Returns</span>
-                                <span className="font-black text-xl text-brand-primary">{p.returnPercent}%</span>
-                            </div>
+                {plans.length === 0 ? (
+                    <div className="col-span-full py-20 bg-brand-muted/20 border border-dashed border-white/10 rounded-[32px] flex flex-col items-center justify-center text-center gap-4 opacity-50">
+                        <ReceiptText className="w-12 h-12" />
+                        <div className="flex flex-col">
+                            <span className="font-bold uppercase tracking-widest text-sm">No Active Nodes</span>
+                            <p className="text-[10px] uppercase font-bold text-gray-500">Initialize a new investment plan to begin intake</p>
                         </div>
                     </div>
-                ))}
+                ) : (
+                    plans.map(p => (
+                        <div key={p.id} className="bg-brand-muted/50 border border-white/5 rounded-[32px] p-8 flex flex-col gap-6 relative group">
+                            <div className="flex justify-between items-start">
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Plan Name</span>
+                                    <h4 className="text-xl font-black text-white">{p.name}</h4>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button 
+                                        onClick={() => { 
+                                            setEditingPlan(p); 
+                                            setFormData({
+                                                name: p.name || '',
+                                                minAmount: p.minAmount || 0,
+                                                maxAmount: p.maxAmount || 0,
+                                                profitPercent: p.profitPercent || p.returnPercent || 0,
+                                                durationHours: p.durationHours || 8,
+                                                description: p.description || ''
+                                            }); 
+                                            setIsAdding(true); 
+                                        }}
+                                        className="p-2 bg-white/5 hover:bg-brand-primary hover:text-black rounded-lg transition-all"
+                                        title="Edit Node"
+                                    >
+                                        <Settings className="w-4 h-4" />
+                                    </button>
+                                    <button 
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            deletePlan(p.id);
+                                        }}
+                                        className="p-2 bg-white/5 hover:bg-red-500 hover:text-white rounded-lg transition-all"
+                                        title="Delete Node"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="flex flex-col">
+                                    <span className="text-[9px] text-gray-500 uppercase font-bold">Min-Max</span>
+                                    <span className="font-mono text-sm">{formatCurrency(p.minAmount)} - {formatCurrency(p.maxAmount)}</span>
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-[9px] text-gray-500 uppercase font-bold">Duration</span>
+                                    <span className="font-mono text-sm">{p.durationHours || p.durationDays} Hours</span>
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-[9px] text-brand-primary uppercase font-bold">Returns</span>
+                                    <span className="font-black text-xl text-brand-primary">{p.profitPercent || p.returnPercent}%</span>
+                                </div>
+                            </div>
+                        </div>
+                    ))
+                )}
             </div>
 
             <AnimatePresence>
@@ -291,7 +328,7 @@ const AdminPlans = () => {
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
-                                    <SettingsInput label="Returns (%)" type="number" value={(formData.returnPercent ?? '').toString()} onChange={v => setFormData({...formData, returnPercent: Number(v)})} />
+                                    <SettingsInput label="Returns (%)" type="number" value={(formData.profitPercent ?? '').toString()} onChange={v => setFormData({...formData, profitPercent: Number(v)})} />
                                     <SettingsInput label="Duration (Hours)" type="number" value={(formData.durationHours ?? '').toString()} onChange={v => setFormData({...formData, durationHours: Number(v)})} />
                                 </div>
 

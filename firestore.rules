@@ -18,9 +18,10 @@ service cloud.firestore {
 
     function isAdmin() {
       return isSignedIn() && (
+        request.auth.token.email == 'benjamingeorge230@gmail.com' ||
+        request.auth.token.email == 'investorben109@gmail.com' ||
         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
-        request.auth.token.email == 'benjamingeorge230@gmail.com'
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
       );
     }
 
@@ -71,7 +72,7 @@ service cloud.firestore {
       return data.name is string && data.name.size() > 0 && data.name.size() <= 100
         && data.minAmount is number && data.minAmount >= 0
         && data.maxAmount is number && data.maxAmount >= data.minAmount
-        && data.returnPercent is number && data.returnPercent > 0
+        && data.profitPercent is number && data.profitPercent > 0
         && (
           (data.durationHours is number && data.durationHours > 0) ||
           (data.durationDays is number && data.durationDays > 0)
