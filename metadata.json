@@ -1,0 +1,14 @@
+{
+  "name": "Freedom Company",
+  "description": "Premium Investment Platform for Philippines - Secure, Real-time, and High Return Investments.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "Firebase Authentication",
+    "Real-time Firestore Database",
+    "Cloudinary Image Integration",
+    "Admin Control Dashboard"
+  ]
+}

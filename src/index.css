@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-brand-primary: #3B82F6; /* Blue-500 */
+  --color-brand-accent: #10B981;  /* Emerald-500 */
+  --color-brand-dark: #0F172A;    /* Slate-900 */
+  --color-brand-muted: #1E293B;   /* Slate-800 */
+}
+
+@layer base {
+  body {
+    @apply bg-[#0F172A] text-slate-100 font-sans overflow-x-hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply backdrop-blur-xl bg-white/10 border border-white/20 shadow-xl;
+  }
+  
+  .glass-card {
+    @apply backdrop-blur-lg bg-slate-800/40 border border-white/5 shadow-lg;
+  }
+}
+
+/* Decorative Blobs */
+.blob-blue {
+  @apply absolute w-64 h-64 bg-blue-600/20 blur-[100px] rounded-full -z-10;
+}
+
+.blob-emerald {
+  @apply absolute w-64 h-64 bg-emerald-600/20 blur-[80px] rounded-full -z-10;
+}
+
+/* Custom scrollbar for a cleaner mobile feel */
+::-webkit-scrollbar {
+  width: 0px;
+}
+
+/* Animations */
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out forwards;
+}

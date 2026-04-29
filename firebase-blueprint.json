@@ -1,0 +1,108 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and financial summary",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "username": { "type": "string" },
+        "email": { "type": "string" },
+        "balance": { "type": "number", "description": "Current available balance in PHP" },
+        "totalEarnings": { "type": "number" },
+        "referralCode": { "type": "string" },
+        "referredBy": { "type": "string", "description": "UID of the referrer" },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "username", "balance", "role"]
+    },
+    "Investment": {
+      "title": "Investment",
+      "description": "Active or completed investment records",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "planName": { "type": "string" },
+        "amount": { "type": "number" },
+        "profit": { "type": "number" },
+        "totalReturn": { "type": "number" },
+        "startedAt": { "type": "string", "format": "date-time" },
+        "endsAt": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["running", "completed"] }
+      },
+      "required": ["userId", "amount", "startedAt", "endsAt", "status"]
+    },
+    "Deposit": {
+      "title": "Deposit",
+      "description": "Deposit requests",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "username": { "type": "string" },
+        "amount": { "type": "number" },
+        "proofUrl": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "reviewedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "amount", "proofUrl", "status", "createdAt"]
+    },
+    "Withdrawal": {
+      "title": "Withdrawal",
+      "description": "Withdrawal requests",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "username": { "type": "string" },
+        "amount": { "type": "number" },
+        "fee": { "type": "number" },
+        "netAmount": { "type": "number" },
+        "bankDetails": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "amount", "bankDetails", "status", "createdAt"]
+    },
+    "ChatMessage": {
+      "title": "ChatMessage",
+      "description": "Messages between user and admin",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "chatId": { "type": "string", "description": "Typically userUid" },
+        "senderId": { "type": "string" },
+        "text": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "isAdmin": { "type": "boolean" }
+      },
+      "required": ["chatId", "text", "timestamp"]
+    },
+    "SystemSettings": {
+      "title": "SystemSettings",
+      "description": "Global configuration",
+      "type": "object",
+      "properties": {
+        "gcashName": { "type": "string" },
+        "gcashNumber": { "type": "string" },
+        "withdrawalFeePercent": { "type": "number" },
+        "minWithdrawal": { "type": "number" },
+        "maxWithdrawal": { "type": "number" },
+        "referralBonus": { "type": "number" },
+        "whatsappAdmin": { "type": "string" },
+        "whatsappGroup": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": { "schema": "User", "description": "User profiles" },
+    "/investments/{investmentId}": { "schema": "Investment", "description": "User investments" },
+    "/deposits/{depositId}": { "schema": "Deposit", "description": "Deposit requests" },
+    "/withdrawals/{withdrawalId}": { "schema": "Withdrawal", "description": "Withdrawal requests" },
+    "/chats/{chatId}/messages/{messageId}": { "schema": "ChatMessage", "description": "Chat messages" },
+    "/settings/global": { "schema": "SystemSettings", "description": "System wide settings" }
+  }
+}

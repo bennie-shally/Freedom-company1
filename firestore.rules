@@ -1,0 +1,132 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      // In this app we don't strictly require email verification for demo ease, 
+      // but let's stick to isSignedIn() for now or require it if strictly needed.
+      return isSignedIn();
+    }
+
+    function isAdmin() {
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Schemas ---
+    function isValidUser(data) {
+      return data.uid == request.auth.uid 
+        && data.username is string && data.username.size() <= 50
+        && data.balance is number
+        && data.role in ['user', 'admin'];
+    }
+
+    function isValidInvestment(data) {
+      return data.userId == request.auth.uid
+        && data.amount is number && data.amount > 0
+        && data.status in ['running', 'completed'];
+    }
+
+    function isValidDeposit(data) {
+      return data.userId == request.auth.uid
+        && data.amount is number && data.amount >= 500
+        && data.proofUrl is string && data.proofUrl.size() < 1000
+        && data.status == 'pending';
+    }
+
+    function isValidWithdrawal(data) {
+      return data.userId == request.auth.uid
+        && data.amount is number && data.amount >= 500
+        && data.bankDetails is string && data.bankDetails.size() < 500
+        && data.status == 'pending';
+    }
+
+    // --- Collection Rules ---
+
+    // Users
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && isValidUser(incoming()) && incoming().role == 'user' && incoming().balance == 0;
+      allow update: if isAdmin() || (
+        isOwner(userId) && 
+        incoming().diff(existing()).affectedKeys().hasOnly(['username', 'balance', 'totalEarnings']) &&
+        // Note: Allowing balance update on client is risky but needed for our "maturation/payout" logic 
+        // which runs in browser for this version. In a production app, this would be restricted.
+        isValidUser(incoming())
+      );
+    }
+
+    // Investments
+    match /investments/{invId} {
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && isValidInvestment(incoming());
+      allow update: if isAdmin() || (
+        isSignedIn() && resource.data.userId == request.auth.uid &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['status']) &&
+        isValidInvestment(incoming())
+      );
+    }
+
+    // Deposits
+    match /deposits/{depId} {
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && isValidDeposit(incoming());
+      allow update: if isAdmin();
+    }
+
+    // Withdrawals
+    match /withdrawals/{witId} {
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && isValidWithdrawal(incoming());
+      allow update: if isAdmin();
+    }
+
+    // Chats
+    match /chats/{chatId} {
+      allow read: if isOwner(chatId) || isAdmin();
+      match /messages/{msgId} {
+        allow read, list: if isOwner(chatId) || isAdmin();
+        allow create: if (isOwner(chatId) && !incoming().isAdmin) || isAdmin();
+      }
+    }
+
+    // Settings
+    match /settings/global {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+    
+    // Investment Plans (admin configurable)
+    match /investment_plans/{planId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+  }
+}
