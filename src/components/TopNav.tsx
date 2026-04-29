@@ -20,7 +20,7 @@ export const TopNav: React.FC = () => {
   const handleLogout = async () => {
     await signOut(auth);
     setIsOpen(false);
-    navigate('/login');
+    navigate('/landing');
   };
 
   return (

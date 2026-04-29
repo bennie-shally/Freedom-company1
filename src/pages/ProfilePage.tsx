@@ -25,7 +25,7 @@ export const ProfilePage: React.FC = () => {
 
   const handleLogout = async () => {
     await signOut(auth);
-    navigate('/login');
+    navigate('/landing');
   };
 
   return (

@@ -113,7 +113,7 @@ export const AdminLogin: React.FC = () => {
         </form>
 
         <button 
-          onClick={() => navigate('/')} 
+          onClick={() => navigate('/landing')} 
           className="mt-8 flex items-center justify-center gap-3 text-[10px] text-slate-600 hover:text-slate-400 transition-colors w-full uppercase font-black tracking-[0.3em]"
         >
           <ArrowLeft className="w-4 h-4" /> Exit Node

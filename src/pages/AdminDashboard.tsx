@@ -92,9 +92,10 @@ export const AdminDashboard: React.FC = () => {
           <SidebarLink active={activeTab === 'settings'} icon={<Settings className="w-5 h-5"/>} label="System Settings" onClick={() => setActiveTab('settings')} />
           <div className="mt-auto pt-4 border-t border-white/5">
             <button 
-              onClick={() => {
+              onClick={async () => {
                 sessionStorage.removeItem('isAdminAuthenticated');
-                navigate('/admin/login');
+                await auth.signOut();
+                navigate('/landing');
               }}
               className="flex items-center gap-4 p-4 rounded-2xl text-red-400 hover:bg-red-500/10 transition-all font-bold w-full"
             >
@@ -129,9 +130,10 @@ export const AdminDashboard: React.FC = () => {
                 <SidebarLink active={activeTab === 'chats'} icon={<MessageSquare className="w-5 h-5"/>} label="Live Chats" onClick={() => { setActiveTab('chats'); setIsSidebarOpen(false); }} />
                 <SidebarLink active={activeTab === 'settings'} icon={<Settings className="w-5 h-5"/>} label="Settings" onClick={() => { setActiveTab('settings'); setIsSidebarOpen(false); }} />
                 <button 
-                  onClick={() => {
+                  onClick={async () => {
                     sessionStorage.removeItem('isAdminAuthenticated');
-                    navigate('/admin/login');
+                    await auth.signOut();
+                    navigate('/landing');
                   }}
                   className="flex items-center gap-4 p-4 rounded-2xl text-red-400 hover:bg-red-500/10 transition-all font-bold w-full mt-4 border-t border-white/5"
                 >
