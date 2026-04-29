@@ -6,7 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ShieldCheck, TrendingUp, Users, CheckCircle2, ChevronRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { formatCurrency, cn } from '../lib/utils';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -18,6 +18,7 @@ const testimonials = [
 
 export const LandingPage: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [liveTransactions, setLiveTransactions] = useState<{name: string, type: string, amount: number}[]>([]);
 
   useEffect(() => {
@@ -38,7 +39,13 @@ export const LandingPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex flex-col gap-16 pb-20 overflow-x-hidden">
+    <div className="flex flex-col gap-16 pb-20 overflow-x-hidden relative min-h-screen">
+      {/* Hidden Admin Entry */}
+      <div 
+        onClick={() => navigate('/admin/login')}
+        className="absolute bottom-4 right-4 w-4 h-4 opacity-0 cursor-default hover:opacity-10 transition-opacity z-50 bg-white/5 rounded-full"
+        title="Admin Entry"
+      />
       {/* Hero Section */}
       <section className="px-8 pt-16 text-center relative">
         <motion.div

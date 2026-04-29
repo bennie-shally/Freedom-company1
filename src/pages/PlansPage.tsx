@@ -63,6 +63,7 @@ export const PlansPage: React.FC = () => {
         profit,
         totalReturn,
         startedAt: serverTimestamp(),
+        createdAt: serverTimestamp(), // Added for consistency in history
         endsAt: endsAt,
         status: 'running',
       });

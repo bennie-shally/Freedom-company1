@@ -14,12 +14,19 @@ export const ProfilePage: React.FC = () => {
   const { userData } = useAuth();
   const navigate = useNavigate();
 
+  if (!userData) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center gap-6">
+        <div className="w-16 h-16 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin shadow-2xl shadow-blue-500/10" />
+        <p className="text-[10px] font-black tracking-[0.5em] text-slate-500 uppercase">Synchronizing Node...</p>
+      </div>
+    );
+  }
+
   const handleLogout = async () => {
     await signOut(auth);
     navigate('/login');
   };
-
-  if (!userData) return null;
 
   return (
     <div className="p-8 flex flex-col gap-10 pb-24 text-slate-100">

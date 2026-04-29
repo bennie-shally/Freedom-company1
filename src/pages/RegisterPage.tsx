@@ -5,12 +5,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, getDoc, collection, query, where, getDocs, writeBatch, increment, limit } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { User, Mail, Lock, UserPlus, ArrowLeft } from 'lucide-react';
 import { generateReferralCode } from '../lib/utils';
+import { handleFirestoreError, OperationType } from '../lib/errorHandlers';
 
 export const RegisterPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -33,22 +34,81 @@ export const RegisterPage: React.FC = () => {
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       const user = userCredential.user;
 
+      let referrerUid = null;
+      let bonus = 0;
+
+      // Lookup referrer and settings
+      if (formData.referralCode) {
+        try {
+          const referralCode = formData.referralCode.toUpperCase();
+          const [settingsSnap, referrerQuerySnap] = await Promise.all([
+            getDoc(doc(db, 'settings', 'global')),
+            getDocs(query(collection(db, 'users'), where('referralCode', '==', referralCode), limit(1)))
+          ]);
+
+          if (settingsSnap.exists()) {
+            bonus = settingsSnap.data().referralBonus || 0;
+          }
+
+          if (!referrerQuerySnap.empty) {
+            referrerUid = referrerQuerySnap.docs[0].id;
+          } else {
+            // Fallback: check lowercase if uppercase not found (for old codes)
+            const fallbackSnap = await getDocs(query(collection(db, 'users'), where('referralCode', '==', formData.referralCode.toLowerCase()), limit(1)));
+            if (!fallbackSnap.empty) {
+              referrerUid = fallbackSnap.docs[0].id;
+            } else {
+              throw new Error('Invalid referral code. Please check and try again.');
+            }
+          }
+        } catch (err: any) {
+          if (err.message.includes('Invalid referral code')) throw err;
+          console.error("Referral check failed:", err);
+        }
+      }
+
+      const batch = writeBatch(db);
+
       // Initialize user data in Firestore
-      await setDoc(doc(db, 'users', user.uid), {
+      batch.set(doc(db, 'users', user.uid), {
         uid: user.uid,
         username: formData.username,
         email: formData.email,
         balance: 0,
         totalEarnings: 0,
         referralCode: generateReferralCode(),
-        referredBy: formData.referralCode || null,
+        referredBy: formData.referralCode ? formData.referralCode.toUpperCase() : null,
+        referredByUid: referrerUid,
         role: 'user',
         createdAt: serverTimestamp(),
       });
 
+      // Apply referral bonus to referrer
+      if (referrerUid && bonus > 0) {
+        batch.update(doc(db, 'users', referrerUid), {
+          balance: increment(bonus),
+          totalEarnings: increment(bonus)
+        });
+      }
+
+      await batch.commit();
+
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.message);
+      if (err.code === 'auth/email-already-in-use') {
+        setError('This email is already registered. Please use a different email or login.');
+      } else if (err.code === 'auth/weak-password') {
+        setError('Password should be at least 6 characters.');
+      } else if (err.code === 'auth/invalid-email') {
+        setError('Please enter a valid email address.');
+      } else {
+        try {
+          handleFirestoreError(err, OperationType.WRITE, 'users');
+        } catch (e) {
+          // If handleFirestoreError throws, it's already logged or handled
+        }
+        setError(err.message || 'An error occurred during registration.');
+      }
     } finally {
       setLoading(false);
     }

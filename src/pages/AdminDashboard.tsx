@@ -4,30 +4,66 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { collection, addDoc, query, onSnapshot, doc, updateDoc, increment, getDoc, setDoc, orderBy, writeBatch, where, serverTimestamp } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { useNavigate } from 'react-router-dom';
+import { collection, addDoc, query, onSnapshot, doc, updateDoc, increment, getDoc, setDoc, orderBy, writeBatch, where, serverTimestamp, deleteDoc } from 'firebase/firestore';
+import { auth, db } from '../lib/firebase';
+import { useAuth } from '../contexts/AuthContext';
 import { formatCurrency, cn } from '../lib/utils';
 import { 
   BarChart3, Users, Wallet, ReceiptText, Settings, MessageSquare, 
   Check, X, Eye, ArrowUpRight, ArrowDownLeft, Save, Plus, Trash2, 
-  Menu as Hamburger, User as UserIcon, Shield as AdminShield
+  Menu as Hamburger, User as UserIcon, Shield as AdminShield,
+  ArrowLeft
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format } from 'date-fns';
+import { handleFirestoreError, OperationType } from '../lib/errorHandlers';
 
-type AdminTab = 'overview' | 'users' | 'deposits' | 'withdrawals' | 'settings' | 'chats';
+type AdminTab = 'overview' | 'users' | 'plans' | 'deposits' | 'withdrawals' | 'settings' | 'chats';
 
 export const AdminDashboard: React.FC = () => {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [stats, setStats] = useState({ totalUsers: 0, totalDeposits: 0, totalWithdrawals: 0, pendingDeposits: 0, pendingWithdrawals: 0 });
+  const [authenticated, setAuthenticated] = useState(false);
 
   // Auth check
   useEffect(() => {
-    if (sessionStorage.getItem('isAdminAuthenticated') !== 'true') {
-      window.location.href = '/admin/login';
+    if (loading) return;
+    
+    const isAdminAuth = sessionStorage.getItem('isAdminAuthenticated') === 'true';
+    
+    if (!isAdminAuth) {
+      navigate('/admin/login', { replace: true });
+    } else if (user) {
+      setAuthenticated(true);
     }
-  }, []);
+  }, [user, loading, navigate]);
+
+  if (loading) return <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center font-black tracking-[0.5em] text-blue-500 uppercase animate-pulse">Security Check...</div>;
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center p-6 text-center gap-8">
+        <div className="w-20 h-20 rounded-[2rem] bg-red-600/10 flex items-center justify-center text-red-500 border border-red-500/20 shadow-2xl shadow-red-500/10">
+          <AdminShield className="w-10 h-10" />
+        </div>
+        <div className="space-y-2 max-w-md">
+            <h1 className="text-2xl font-black text-white uppercase tracking-tight">Identity Required</h1>
+            <p className="text-slate-500 text-sm font-medium">To access administrative functions, you must first verify your primary identity. Please log in to your account.</p>
+        </div>
+        <button 
+            onClick={() => navigate('/login?redirect=/admin/dashboard')}
+            className="px-10 py-4 bg-white text-black font-black uppercase tracking-widest rounded-2xl hover:bg-slate-200 transition-all active:scale-95 shadow-2xl"
+        >
+            Identity Verification
+        </button>
+      </div>
+    );
+  }
+
+  if (!authenticated) return null;
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white flex">
@@ -37,10 +73,23 @@ export const AdminDashboard: React.FC = () => {
         <nav className="flex flex-col gap-2">
           <SidebarLink active={activeTab === 'overview'} icon={<BarChart3 className="w-5 h-5"/>} label="Overview" onClick={() => setActiveTab('overview')} />
           <SidebarLink active={activeTab === 'users'} icon={<Users className="w-5 h-5"/>} label="Users" onClick={() => setActiveTab('users')} />
+          <SidebarLink active={activeTab === 'plans'} icon={<ReceiptText className="w-5 h-5"/>} label="Investment Plans" onClick={() => setActiveTab('plans')} />
           <SidebarLink active={activeTab === 'deposits'} icon={<ArrowDownLeft className="w-5 h-5"/>} label="Deposits" onClick={() => setActiveTab('deposits')} />
           <SidebarLink active={activeTab === 'withdrawals'} icon={<ArrowUpRight className="w-5 h-5"/>} label="Withdrawals" onClick={() => setActiveTab('withdrawals')} />
           <SidebarLink active={activeTab === 'chats'} icon={<MessageSquare className="w-5 h-5"/>} label="Live Chats" onClick={() => setActiveTab('chats')} />
           <SidebarLink active={activeTab === 'settings'} icon={<Settings className="w-5 h-5"/>} label="System Settings" onClick={() => setActiveTab('settings')} />
+          <div className="mt-auto pt-4 border-t border-white/5">
+            <button 
+              onClick={() => {
+                sessionStorage.removeItem('isAdminAuthenticated');
+                navigate('/admin/login');
+              }}
+              className="flex items-center gap-4 p-4 rounded-2xl text-red-400 hover:bg-red-500/10 transition-all font-bold w-full"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span className="text-sm tracking-wide">Secure Exit</span>
+            </button>
+          </div>
         </nav>
       </aside>
 
@@ -62,10 +111,21 @@ export const AdminDashboard: React.FC = () => {
               <nav className="flex flex-col gap-2">
                 <SidebarLink active={activeTab === 'overview'} icon={<BarChart3 className="w-5 h-5"/>} label="Overview" onClick={() => { setActiveTab('overview'); setIsSidebarOpen(false); }} />
                 <SidebarLink active={activeTab === 'users'} icon={<Users className="w-5 h-5"/>} label="Users" onClick={() => { setActiveTab('users'); setIsSidebarOpen(false); }} />
+                <SidebarLink active={activeTab === 'plans'} icon={<ReceiptText className="w-5 h-5"/>} label="Plans" onClick={() => { setActiveTab('plans'); setIsSidebarOpen(false); }} />
                 <SidebarLink active={activeTab === 'deposits'} icon={<ArrowDownLeft className="w-5 h-5"/>} label="Deposits" onClick={() => { setActiveTab('deposits'); setIsSidebarOpen(false); }} />
                 <SidebarLink active={activeTab === 'withdrawals'} icon={<ArrowUpRight className="w-5 h-5"/>} label="Withdrawals" onClick={() => { setActiveTab('withdrawals'); setIsSidebarOpen(false); }} />
                 <SidebarLink active={activeTab === 'chats'} icon={<MessageSquare className="w-5 h-5"/>} label="Live Chats" onClick={() => { setActiveTab('chats'); setIsSidebarOpen(false); }} />
                 <SidebarLink active={activeTab === 'settings'} icon={<Settings className="w-5 h-5"/>} label="Settings" onClick={() => { setActiveTab('settings'); setIsSidebarOpen(false); }} />
+                <button 
+                  onClick={() => {
+                    sessionStorage.removeItem('isAdminAuthenticated');
+                    navigate('/admin/login');
+                  }}
+                  className="flex items-center gap-4 p-4 rounded-2xl text-red-400 hover:bg-red-500/10 transition-all font-bold w-full mt-4 border-t border-white/5"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                  <span className="text-sm tracking-wide">Secure Exit</span>
+                </button>
               </nav>
             </motion.div>
           </>
@@ -76,6 +136,7 @@ export const AdminDashboard: React.FC = () => {
       <main className="flex-1 p-6 md:p-10 pt-24 md:pt-10 overflow-y-auto">
         {activeTab === 'overview' && <AdminOverview />}
         {activeTab === 'users' && <AdminUsers />}
+        {activeTab === 'plans' && <AdminPlans />}
         {activeTab === 'deposits' && <AdminDeposits />}
         {activeTab === 'withdrawals' && <AdminWithdrawals />}
         {activeTab === 'settings' && <AdminSettings />}
@@ -114,34 +175,182 @@ const SidebarLink = ({ active, icon, label, onClick }: { active: boolean, icon: 
 
 // --- Sub Panels ---
 
+const AdminPlans = () => {
+    const [plans, setPlans] = useState<any[]>([]);
+    const [isAdding, setIsAdding] = useState(false);
+    const [editingPlan, setEditingPlan] = useState<any>(null);
+    const [formData, setFormData] = useState({
+      name: '', minAmount: 100, maxAmount: 1000, 
+      returnPercent: 10, durationHours: 8, description: ''
+    });
+
+    useEffect(() => {
+      const q = query(collection(db, 'investment_plans'), orderBy('minAmount', 'asc'));
+      return onSnapshot(q, s => setPlans(s.docs.map(d => ({id: d.id, ...d.data()}))), (err) => handleFirestoreError(err, OperationType.LIST, 'investment_plans'));
+    }, []);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            if (editingPlan) {
+                await updateDoc(doc(db, 'investment_plans', editingPlan.id), formData);
+            } else {
+                await addDoc(collection(db, 'investment_plans'), formData);
+            }
+            setIsAdding(false);
+            setEditingPlan(null);
+            setFormData({ name: '', minAmount: 100, maxAmount: 1000, returnPercent: 10, durationHours: 8, description: '' });
+        } catch (err: any) {
+            handleFirestoreError(err, OperationType.WRITE, 'investment_plans');
+        }
+    };
+
+    const deletePlan = async (id: string) => {
+        if (!confirm('Are you sure you want to delete this plan?')) return;
+        try {
+            await deleteDoc(doc(db, 'investment_plans', id));
+        } catch (err: any) {
+            handleFirestoreError(err, OperationType.DELETE, 'investment_plans');
+        }
+    };
+
+    return (
+        <div className="flex flex-col gap-8">
+            <div className="flex justify-between items-center">
+                <h2 className="text-3xl font-bold">Investment Plans</h2>
+                <button 
+                  onClick={() => setIsAdding(true)}
+                  className="px-6 py-3 bg-brand-primary text-black font-black uppercase text-xs tracking-widest rounded-2xl flex items-center gap-2"
+                >
+                    <Plus className="w-4 h-4" /> Add New Plan
+                </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {plans.map(p => (
+                    <div key={p.id} className="bg-brand-muted/50 border border-white/5 rounded-[32px] p-8 flex flex-col gap-6 relative group">
+                        <div className="flex justify-between items-start">
+                            <div className="flex flex-col">
+                                <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Plan Name</span>
+                                <h4 className="text-xl font-black text-white">{p.name}</h4>
+                            </div>
+                            <div className="flex gap-2">
+                                <button 
+                                    onClick={() => { setEditingPlan(p); setFormData(p); setIsAdding(true); }}
+                                    className="p-2 bg-white/5 hover:bg-brand-primary hover:text-black rounded-lg transition-all"
+                                >
+                                    <Settings className="w-4 h-4" />
+                                </button>
+                                <button 
+                                    onClick={() => deletePlan(p.id)}
+                                    className="p-2 bg-white/5 hover:bg-red-500 hover:text-white rounded-lg transition-all"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="flex flex-col">
+                                <span className="text-[9px] text-gray-500 uppercase font-bold">Min-Max</span>
+                                <span className="font-mono text-sm">{formatCurrency(p.minAmount)} - {formatCurrency(p.maxAmount)}</span>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-[9px] text-gray-500 uppercase font-bold">Duration</span>
+                                <span className="font-mono text-sm">{p.durationHours || p.durationDays} Hours</span>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-[9px] text-brand-primary uppercase font-bold">Returns</span>
+                                <span className="font-black text-xl text-brand-primary">{p.returnPercent}%</span>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <AnimatePresence>
+                {isAdding && (
+                    <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[100] flex items-center justify-center p-6">
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-brand-muted border border-white/10 w-full max-w-xl rounded-[40px] p-10 flex flex-col gap-8 shadow-2xl"
+                        >
+                            <div className="flex justify-between items-center">
+                                <h3 className="text-2xl font-black uppercase tracking-tight">{editingPlan ? 'Edit Plan' : 'New Matrix Node'}</h3>
+                                <button onClick={() => { setIsAdding(false); setEditingPlan(null); }} className="p-3 bg-white/5 rounded-full"><X className="w-6 h-6"/></button>
+                            </div>
+
+                            <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+                                <SettingsInput label="Plan Name" value={formData.name} onChange={v => setFormData({...formData, name: v})} />
+                                
+                                <div className="grid grid-cols-2 gap-4">
+                                    <SettingsInput label="Min Amount (PHP)" type="number" value={(formData.minAmount ?? '').toString()} onChange={v => setFormData({...formData, minAmount: Number(v)})} />
+                                    <SettingsInput label="Max Amount (PHP)" type="number" value={(formData.maxAmount ?? '').toString()} onChange={v => setFormData({...formData, maxAmount: Number(v)})} />
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <SettingsInput label="Returns (%)" type="number" value={(formData.returnPercent ?? '').toString()} onChange={v => setFormData({...formData, returnPercent: Number(v)})} />
+                                    <SettingsInput label="Duration (Hours)" type="number" value={(formData.durationHours ?? '').toString()} onChange={v => setFormData({...formData, durationHours: Number(v)})} />
+                                </div>
+
+                                <button className="w-full py-5 bg-brand-primary text-black font-black uppercase tracking-widest rounded-3xl mt-4 active:scale-95 transition-all">
+                                    {editingPlan ? 'Confirm Matrix Update' : 'Initialize Node'}
+                                </button>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};
+
 const AdminOverview = () => {
   const [stats, setStats] = useState({ users: 0, depositSum: 0, withdrawSum: 0, pendingDep: 0, pendingWit: 0 });
 
   useEffect(() => {
-    const unsubUsers = onSnapshot(collection(db, 'users'), s => setStats(prev => ({...prev, users: s.size})));
-    const unsubDep = onSnapshot(query(collection(db, 'deposits'), where('status', '==', 'pending')), s => setStats(prev => ({...prev, pendingDep: s.size})));
-    const unsubWit = onSnapshot(query(collection(db, 'withdrawals'), where('status', '==', 'pending')), s => setStats(prev => ({...prev, pendingWit: s.size})));
+    const unsubUsers = onSnapshot(collection(db, 'users'), s => setStats(prev => ({...prev, users: s.size})), (err) => handleFirestoreError(err, OperationType.LIST, 'users'));
+    const unsubDep = onSnapshot(query(collection(db, 'deposits'), where('status', '==', 'pending')), s => setStats(prev => ({...prev, pendingDep: s.size})), (err) => handleFirestoreError(err, OperationType.LIST, 'deposits'));
+    const unsubWit = onSnapshot(query(collection(db, 'withdrawals'), where('status', '==', 'pending')), s => setStats(prev => ({...prev, pendingWit: s.size})), (err) => handleFirestoreError(err, OperationType.LIST, 'withdrawals'));
     
     return () => { unsubUsers(); unsubDep(); unsubWit(); };
   }, []);
 
   return (
-    <div className="flex flex-col gap-10">
-      <h2 className="text-4xl font-bold tracking-tight">Financial Health</h2>
+    <div className="flex flex-col gap-12">
+      <div className="flex flex-col gap-2">
+        <h2 className="text-4xl font-black tracking-tight text-white uppercase">System Matrix</h2>
+        <p className="text-slate-500 font-medium uppercase tracking-[0.2em] text-[10px]">Real-time operational awareness</p>
+      </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatsCard label="Total Users" value={stats.users.toString()} icon={<Users />} color="text-brand-primary" />
-        <StatsCard label="Pending Deposits" value={stats.pendingDep.toString()} icon={<ArrowDownLeft />} color="text-blue-400" />
-        <StatsCard label="Pending Withdrawals" value={stats.pendingWit.toString()} icon={<ArrowUpRight />} color="text-red-400" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <StatsCard label="Verified Identities" value={stats.users.toString()} icon={<Users className="w-6 h-6"/>} color="text-blue-400" />
+        <StatsCard label="Pending Injections" value={stats.pendingDep.toString()} icon={<ArrowDownLeft className="w-6 h-6"/>} color="text-emerald-400" />
+        <StatsCard label="Pending Extractions" value={stats.pendingWit.toString()} icon={<ArrowUpRight className="w-6 h-6"/>} color="text-red-400" />
       </div>
 
-      <div className="bg-brand-muted/30 border border-white/5 rounded-[40px] p-10 flex flex-col items-center justify-center text-center gap-6">
-        <div className="w-20 h-20 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary">
-          <AdminShield className="w-10 h-10" />
+      <div className="glass-panel border-white/10 rounded-[3rem] p-12 flex flex-col items-center justify-center text-center gap-8 relative overflow-hidden">
+        <div className="absolute inset-0 bg-blue-500/5 blur-3xl -z-10" />
+        <div className="w-24 h-24 rounded-[2rem] bg-blue-600/10 flex items-center justify-center text-blue-400 border border-blue-500/20 shadow-2xl">
+          <AdminShield className="w-12 h-12" />
         </div>
-        <div className="max-w-md">
-          <h3 className="text-2xl font-bold mb-2">Systems Operational</h3>
-          <p className="text-gray-500 text-sm leading-relaxed">Cross-browser syncing is active. All user withdrawals and deposits are correctly reflecting in your terminal.</p>
+        <div className="max-w-lg">
+          <h3 className="text-3xl font-black mb-4 tracking-tight text-white uppercase">Neural Link Active</h3>
+          <p className="text-slate-500 text-sm leading-relaxed font-medium">
+            Core infrastructure is synchronized across all browser nodes. Encryption tunnels (AES-256) are maintaining 99.9% uptime for transaction validation.
+          </p>
+        </div>
+        <div className="flex gap-4">
+            <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 rounded-full border border-emerald-500/20">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Database Sync</span>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 bg-blue-500/10 rounded-full border border-blue-500/20">
+                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest">HMR Socket</span>
+            </div>
         </div>
       </div>
     </div>
@@ -165,7 +374,7 @@ const AdminUsers = () => {
 
   useEffect(() => {
     const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
-    return onSnapshot(q, s => setUsers(s.docs.map(d => ({id: d.id, ...d.data()}))));
+    return onSnapshot(q, s => setUsers(s.docs.map(d => ({id: d.id, ...d.data()}))), (err) => handleFirestoreError(err, OperationType.LIST, 'users'));
   }, []);
 
   const adjustBalance = async (uid: string, amount: number) => {
@@ -181,6 +390,7 @@ const AdminUsers = () => {
             <tr className="text-[10px] uppercase font-black tracking-widest text-gray-500">
               <th className="px-4 pb-2">User</th>
               <th className="px-4 pb-2">Balance</th>
+              <th className="px-4 pb-2">Referred By</th>
               <th className="px-4 pb-2">Role</th>
               <th className="px-4 pb-2 text-right">Actions</th>
             </tr>
@@ -192,9 +402,13 @@ const AdminUsers = () => {
                   <div className="flex flex-col">
                     <span className="font-bold text-sm">{u.username}</span>
                     <span className="text-[10px] text-gray-500 font-mono">{u.email}</span>
+                    <span className="text-[8px] text-brand-primary font-bold uppercase mt-1">Code: {u.referralCode}</span>
                   </div>
                 </td>
                 <td className="px-4 py-6 font-mono text-brand-primary font-bold">{formatCurrency(u.balance)}</td>
+                <td className="px-4 py-6">
+                  <span className="text-[10px] text-gray-400 font-bold uppercase">{u.referredBy || 'Organic'}</span>
+                </td>
                 <td className="px-4 py-6">
                    <span className={cn("text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-full", u.role === 'admin' ? 'bg-red-500/10 text-red-400' : 'bg-gray-500/10 text-gray-400')}>
                     {u.role}
@@ -218,7 +432,7 @@ const AdminDeposits = () => {
 
   useEffect(() => {
     const q = query(collection(db, 'deposits'), orderBy('createdAt', 'desc'));
-    return onSnapshot(q, s => setDeposits(s.docs.map(d => ({id: d.id, ...d.data()}))));
+    return onSnapshot(q, s => setDeposits(s.docs.map(d => ({id: d.id, ...d.data()}))), (err) => handleFirestoreError(err, OperationType.LIST, 'deposits'));
   }, []);
 
   const handleAction = async (dep: any, action: 'approved' | 'rejected') => {
@@ -240,7 +454,9 @@ const AdminDeposits = () => {
               <div className="flex flex-col">
                 <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest leading-none mb-1">User</span>
                 <span className="font-bold text-lg">{d.username}</span>
-                <span className="text-[10px] text-gray-500 mt-1 uppercase font-bold">{format(d.createdAt.toDate(), 'PPP pp')}</span>
+                <span className="text-[10px] text-gray-500 mt-1 uppercase font-bold">
+                  {d.createdAt ? format(d.createdAt.toDate?.() || new Date(d.createdAt), 'PPP pp') : 'Pending'}
+                </span>
               </div>
               <div className="text-right flex flex-col items-end">
                 <span className="text-2xl font-mono font-black text-brand-primary">{formatCurrency(d.amount)}</span>
@@ -278,7 +494,7 @@ const AdminWithdrawals = () => {
 
     useEffect(() => {
       const q = query(collection(db, 'withdrawals'), orderBy('createdAt', 'desc'));
-      return onSnapshot(q, s => setWithdrawals(s.docs.map(d => ({id: d.id, ...d.data()}))));
+      return onSnapshot(q, s => setWithdrawals(s.docs.map(d => ({id: d.id, ...d.data()}))), (err) => handleFirestoreError(err, OperationType.LIST, 'withdrawals'));
     }, []);
 
     const handleAction = async (wit: any, action: 'approved' | 'rejected') => {
@@ -370,15 +586,15 @@ const AdminSettings = () => {
             </SettingsBox>
             
             <SettingsBox title="Fees & Limits">
-                <SettingsInput label="Withdrawal Fee (%)" value={settings.withdrawalFeePercent.toString()} onChange={v => setSettings({...settings, withdrawalFeePercent: Number(v)})} type="number" />
+                <SettingsInput label="Withdrawal Fee (%)" value={(settings.withdrawalFeePercent ?? '').toString()} onChange={v => setSettings({...settings, withdrawalFeePercent: Number(v)})} type="number" />
                 <div className="grid grid-cols-2 gap-4">
-                    <SettingsInput label="Min Withdraw" value={settings.minWithdrawal.toString()} onChange={v => setSettings({...settings, minWithdrawal: Number(v)})} type="number" />
-                    <SettingsInput label="Max Withdraw" value={settings.maxWithdrawal.toString()} onChange={v => setSettings({...settings, maxWithdrawal: Number(v)})} type="number" />
+                    <SettingsInput label="Min Withdraw" value={(settings.minWithdrawal ?? '').toString()} onChange={v => setSettings({...settings, minWithdrawal: Number(v)})} type="number" />
+                    <SettingsInput label="Max Withdraw" value={(settings.maxWithdrawal ?? '').toString()} onChange={v => setSettings({...settings, maxWithdrawal: Number(v)})} type="number" />
                 </div>
             </SettingsBox>
 
             <SettingsBox title="Bonuses">
-                <SettingsInput label="Referral Bonus (PHP)" value={settings.referralBonus.toString()} onChange={v => setSettings({...settings, referralBonus: Number(v)})} type="number" />
+                <SettingsInput label="Referral Bonus (PHP)" value={(settings.referralBonus ?? '').toString()} onChange={v => setSettings({...settings, referralBonus: Number(v)})} type="number" />
             </SettingsBox>
 
             <SettingsBox title="Links">
@@ -416,13 +632,13 @@ const AdminChats = () => {
     const [replyText, setReplyText] = useState('');
 
     useEffect(() => {
-      return onSnapshot(collection(db, 'chats'), s => setChats(s.docs.map(d => ({id: d.id}))));
+      return onSnapshot(collection(db, 'chats'), s => setChats(s.docs.map(d => ({id: d.id, ...d.data()}))), (err) => handleFirestoreError(err, OperationType.LIST, 'chats'));
     }, []);
 
     useEffect(() => {
       if (!selectedChatId) return;
       const q = query(collection(db, 'chats', selectedChatId, 'messages'), orderBy('timestamp', 'asc'));
-      return onSnapshot(q, s => setMessages(s.docs.map(d => ({id: d.id, ...d.data()}))));
+      return onSnapshot(q, s => setMessages(s.docs.map(d => ({id: d.id, ...d.data()}))), (err) => handleFirestoreError(err, OperationType.LIST, `chats/${selectedChatId}/messages`));
     }, [selectedChatId]);
 
     const handleReply = async (e: React.FormEvent) => {
@@ -431,13 +647,22 @@ const AdminChats = () => {
         
         const text = replyText;
         setReplyText('');
+
+        const batch = writeBatch(db);
+        batch.update(doc(db, 'chats', selectedChatId), {
+            lastMessage: text,
+            lastMessageAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+        });
         
-        await addDoc(collection(db, 'chats', selectedChatId, 'messages'), {
+        batch.set(doc(collection(db, 'chats', selectedChatId, 'messages')), {
             text,
             senderId: 'admin',
             isAdmin: true,
             timestamp: serverTimestamp()
         });
+
+        await batch.commit();
     };
 
     return (
@@ -453,11 +678,11 @@ const AdminChats = () => {
                         >
                             <div className="flex items-center gap-3">
                                 <div className={cn("w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold", selectedChatId === c.id ? "bg-black text-white" : "bg-white/10 text-brand-primary")}>
-                                    {c.id[0].toUpperCase()}
+                                    {(c.username || c.id)[0].toUpperCase()}
                                 </div>
-                                <div className="flex flex-col">
-                                    <span className="font-bold text-sm truncate w-40">{c.id}</span>
-                                    <span className="text-[9px] uppercase font-bold opacity-60">Active Chat</span>
+                                <div className="flex flex-col overflow-hidden">
+                                    <span className="font-bold text-sm truncate">{c.username || c.id}</span>
+                                    <span className="text-[9px] uppercase font-bold opacity-60 truncate">{c.lastMessage || 'Active Chat'}</span>
                                 </div>
                             </div>
                         </button>

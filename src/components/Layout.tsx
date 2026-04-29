@@ -11,7 +11,7 @@ import { Footer } from './Footer';
 
 export const Layout: React.FC = () => {
   const location = useLocation();
-  const hideNav = ['/login', '/register', '/admin/login', '/landing'].includes(location.pathname);
+  const hideNav = ['/login', '/register', '/admin/login', '/landing', '/chat'].includes(location.pathname);
   const isAdminPage = location.pathname.startsWith('/admin');
 
   return (

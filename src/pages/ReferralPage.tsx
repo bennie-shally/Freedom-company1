@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, onSnapshot } from 'firebase/firestore';
+import { collection, query, where, getDocs, onSnapshot, doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { Users, Copy, Share2, TrendingUp, Gift } from 'lucide-react';
@@ -13,12 +13,18 @@ import { formatCurrency } from '../lib/utils';
 export const ReferralPage: React.FC = () => {
   const { userData } = useAuth();
   const [referrals, setReferrals] = useState<any[]>([]);
+  const [bonus, setBonus] = useState(2000);
   const referralLink = `${window.location.origin}/register?ref=${userData?.referralCode}`;
 
   useEffect(() => {
     if (!userData) return;
 
-    const q = query(collection(db, 'users'), where('referredBy', '==', userData.referralCode));
+    // Fetch referral bonus
+    getDoc(doc(db, 'settings', 'global')).then(snap => {
+      if (snap.exists()) setBonus(snap.data().referralBonus || 2000);
+    });
+
+    const q = query(collection(db, 'users'), where('referredBy', '==', userData.referralCode.toUpperCase()));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setReferrals(snapshot.docs.map(doc => doc.data()));
     });
@@ -37,7 +43,7 @@ export const ReferralPage: React.FC = () => {
     <div className="p-6 flex flex-col gap-8 pb-24 text-white">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold tracking-tight">Refer & Earn</h1>
-        <p className="text-gray-500 text-sm">Spread the word and earn ₱2,000 for every active referral.</p>
+        <p className="text-gray-500 text-sm">Spread the word and earn {formatCurrency(bonus)} for every active referral.</p>
       </div>
 
       {/* Bonus Card */}
@@ -72,7 +78,7 @@ export const ReferralPage: React.FC = () => {
       <div className="flex flex-col gap-4">
         <h3 className="font-bold text-sm uppercase tracking-wider text-gray-400 ml-1">Referral Code</h3>
         <div className="flex items-center justify-between bg-brand-muted/50 border border-white/5 p-6 rounded-[32px]">
-          <span className="text-4xl font-mono font-black tracking-widest text-white">{userData.referralCode}</span>
+          <span className="text-4xl font-mono font-black tracking-widest text-white uppercase">{userData.referralCode}</span>
           <button onClick={() => handleCopy()} className="px-6 py-3 bg-white/5 hover:bg-white/10 rounded-2xl font-bold text-sm transition-all">
             Copy
           </button>

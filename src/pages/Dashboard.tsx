@@ -12,6 +12,7 @@ import { motion } from 'motion/react';
 import { Wallet, TrendingUp, Users, ArrowUpRight, ArrowDownLeft, Clock, Zap } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Investment } from '../types';
+import { handleFirestoreError, OperationType } from '../lib/errorHandlers';
 
 export const Dashboard: React.FC = () => {
   const { user, userData } = useAuth();
@@ -35,14 +36,26 @@ export const Dashboard: React.FC = () => {
       // Check for matured investments
       const now = new Date();
       for (const inv of investments) {
-        if (new Date(inv.endsAt.toDate()) <= now) {
+        const endTime = inv.endsAt?.toDate?.() || new Date(inv.endsAt);
+        if (endTime <= now) {
           await completeInvestment(inv);
         }
       }
+    }, (err) => {
+      handleFirestoreError(err, OperationType.LIST, 'investments');
     });
 
     return () => unsubscribe();
   }, [user]);
+
+  if (!user || !userData) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center gap-6">
+        <div className="w-16 h-16 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin shadow-2xl shadow-blue-500/10" />
+        <p className="text-[10px] font-black tracking-[0.5em] text-slate-500 uppercase">Synchronizing Node...</p>
+      </div>
+    );
+  }
 
   const completeInvestment = async (inv: Investment) => {
     try {
@@ -83,46 +96,57 @@ export const Dashboard: React.FC = () => {
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="glass-panel rounded-[2rem] p-8 relative overflow-hidden group shadow-2xl"
+        className="glass-panel rounded-[2.5rem] p-10 relative overflow-hidden group shadow-2xl border-white/10"
       >
-        <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/20 blur-[40px] group-hover:bg-blue-500/30 transition-all rounded-full" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 blur-[80px] -z-10 rounded-full select-none pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-500/10 blur-[80px] -z-10 rounded-full select-none pointer-events-none" />
         
-        <div className="flex justify-between items-start mb-6">
-          <span className="text-[10px] font-black tracking-[0.2em] text-blue-100 uppercase opacity-80">Available Balance</span>
-          <span className="bg-emerald-500/20 text-emerald-400 text-[9px] px-2.5 py-1 rounded-full border border-emerald-500/30 font-black tracking-widest">100% PAYING</span>
+        <div className="flex justify-between items-start mb-10">
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] font-black tracking-[0.4em] text-slate-500 uppercase">Cryptographic Balance</span>
+            <span className="text-white/40 text-[9px] font-bold uppercase tracking-widest">Secured via SHA-256</span>
+          </div>
+          <div className="flex flex-col items-end gap-1">
+            <span className="bg-emerald-500/10 text-emerald-400 text-[9px] px-3 py-1 rounded-full border border-emerald-500/20 font-black tracking-widest shadow-xl shadow-emerald-900/10">ACTIVE SYNC</span>
+          </div>
         </div>
         
-        <div className="flex items-baseline gap-2 mb-8">
-          <h2 className="text-4xl font-black text-white tracking-tight">
+        <div className="flex flex-col gap-2 mb-12">
+          <h2 className="text-5xl font-black text-white tracking-tighter leading-none">
             {formatCurrency(userData.balance)}
           </h2>
+          <p className="text-[10px] text-slate-600 font-black uppercase tracking-[0.3em]">Institutional Liquidity Pool</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-5">
           <button 
             onClick={() => navigate('/deposit')}
-            className="py-3 bg-blue-600 hover:bg-blue-500 rounded-2xl text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-blue-900/40 transition-all active:scale-95"
+            className="py-5 bg-blue-600 hover:bg-blue-500 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] text-white shadow-2xl shadow-blue-900/50 transition-all active:scale-95 flex items-center justify-center gap-2"
           >
-            Deposit
+            <ArrowDownLeft className="w-4 h-4" />
+            Inject
           </button>
           <button 
             onClick={() => navigate('/withdraw')}
-            className="py-3 bg-white/10 hover:bg-white/15 rounded-2xl text-xs font-black uppercase tracking-widest text-white border border-white/10 transition-all active:scale-95"
+            className="py-5 bg-white/5 hover:bg-white/10 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] text-white border border-white/10 transition-all active:scale-95 flex items-center justify-center gap-2 backdrop-blur-md"
           >
-            Withdraw
+            <ArrowUpRight className="w-4 h-4" />
+            Extract
           </button>
         </div>
       </motion.div>
 
       {/* Stats Mini Grid */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="glass-card p-4 rounded-2xl flex flex-col gap-1">
-          <span className="text-[9px] uppercase font-black tracking-widest text-slate-500">Total Profit</span>
-          <span className="text-lg font-black text-emerald-400">+{formatCurrency(userData.totalEarnings)}</span>
+      <div className="grid grid-cols-2 gap-5">
+        <div className="glass-card p-6 rounded-[2rem] flex flex-col gap-2 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/5 blur-xl group-hover:bg-emerald-500/10 transition-all" />
+          <span className="text-[9px] uppercase font-black tracking-[0.3em] text-slate-500 relative z-10">Accumulated</span>
+          <span className="text-2xl font-black text-emerald-400 relative z-10">+{formatCurrency(userData.totalEarnings)}</span>
         </div>
-        <div className="glass-card p-4 rounded-2xl flex flex-col gap-1">
-          <span className="text-[9px] uppercase font-black tracking-widest text-slate-500">Active Cycles</span>
-          <span className="text-lg font-black text-blue-400">{activeInvestments.length}</span>
+        <div className="glass-card p-6 rounded-[2rem] flex flex-col gap-2 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-blue-500/5 blur-xl group-hover:bg-blue-500/10 transition-all" />
+          <span className="text-[9px] uppercase font-black tracking-[0.3em] text-slate-500 relative z-10">Live Nodes</span>
+          <span className="text-2xl font-black text-blue-400 relative z-10">{activeInvestments.length}</span>
         </div>
       </div>
 
@@ -197,7 +221,8 @@ const InvestmentCard: React.FC<{ investment: Investment }> = ({ investment }) =>
   useEffect(() => {
     const timer = setInterval(() => {
       const now = new Date().getTime();
-      const end = new Date(investment.endsAt.toDate()).getTime();
+      const endTime = investment.endsAt?.toDate?.() || new Date(investment.endsAt);
+      const end = endTime.getTime();
       const distance = end - now;
 
       if (distance < 0) {

@@ -5,8 +5,19 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, getDocFromServer } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
+import { handleFirestoreError, OperationType } from '../lib/errorHandlers';
+
+async function testConnection() {
+  try {
+    await getDocFromServer(doc(db, 'settings', 'global'));
+  } catch (error) {
+    if(error instanceof Error && error.message.includes('the client is offline')) {
+      console.error("Please check your Firebase configuration.");
+    }
+  }
+}
 
 interface AuthContextType {
   user: FirebaseUser | null;
@@ -28,6 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    testConnection();
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       if (!currentUser) {
@@ -42,6 +54,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (!user) return;
 
+    const userPath = `users/${user.uid}`;
     const unsubscribeUserDoc = onSnapshot(doc(db, 'users', user.uid), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
@@ -51,7 +64,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       setLoading(false);
     }, (error) => {
-      console.error('Error fetching user data:', error);
+      handleFirestoreError(error, OperationType.GET, userPath);
       setLoading(false);
     });
 

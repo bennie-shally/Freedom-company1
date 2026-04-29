@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../lib/firebase';
-import { useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Mail, Lock, ArrowLeft, LogIn } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
@@ -17,6 +17,8 @@ export const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get('redirect') || '/dashboard';
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +27,7 @@ export const LoginPage: React.FC = () => {
 
     try {
       await signInWithEmailAndPassword(auth, formData.email, formData.password);
-      navigate('/dashboard');
+      navigate(redirectTo);
     } catch (err: any) {
       setError('Invalid email or password. Please try again.');
     } finally {
