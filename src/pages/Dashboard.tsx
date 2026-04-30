@@ -13,6 +13,7 @@ import { Wallet, TrendingUp, Users, ArrowUpRight, ArrowDownLeft, Clock, Zap } fr
 import { Link, useNavigate } from 'react-router-dom';
 import { Investment } from '../types';
 import { handleFirestoreError, OperationType } from '../lib/errorHandlers';
+import { TradingChart } from '../components/TradingChart';
 
 export const Dashboard: React.FC = () => {
   const { user, userData } = useAuth();
@@ -154,6 +155,9 @@ export const Dashboard: React.FC = () => {
           </button>
         </div>
       </motion.div>
+
+      {/* Live Trading Demo Chart */}
+      <TradingChart />
 
       {/* Stats Mini Grid */}
       <div className="grid grid-cols-2 gap-5">
