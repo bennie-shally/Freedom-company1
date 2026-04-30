@@ -10,7 +10,7 @@ import { cn } from '../lib/utils';
 
 export const BottomNav: React.FC = () => {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-20 items-center justify-around bg-slate-900/80 border-t border-white/5 backdrop-blur-md px-6 pb-safe">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 sm:h-20 items-center justify-around bg-slate-900/80 border-t border-white/5 backdrop-blur-md px-4 sm:px-6 pb-safe">
       <NavItem to="/" icon={<Home className="h-6 w-6" />} label="Home" />
       <NavItem to="/plans" icon={<BarChart2 className="h-6 w-6" />} label="Invest" />
       <NavItem to="/referral" icon={<Users className="h-6 w-6" />} label="Refer" />

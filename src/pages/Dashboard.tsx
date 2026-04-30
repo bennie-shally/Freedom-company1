@@ -143,14 +143,14 @@ export const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="p-6 flex flex-col gap-8 pb-12">
+    <div className="p-5 sm:p-6 flex flex-col gap-10 pb-20 sm:pb-12">
       {/* User Hello */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center px-2">
         <div>
-          <p className="text-xs text-slate-400">Good morning,</p>
-          <h2 className="text-xl font-bold">{userData.username}</h2>
+          <p className="text-[10px] sm:text-xs text-slate-400 font-bold uppercase tracking-widest">Good morning,</p>
+          <h2 className="text-xl sm:text-2xl font-bold">{userData.username}</h2>
         </div>
-        <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center border border-white/10 shadow-lg">
+        <div className="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center border border-white/10 shadow-lg">
           <span className="text-sm font-black text-blue-400">{userData.username.substring(0, 2).toUpperCase()}</span>
         </div>
       </div>
@@ -161,7 +161,7 @@ export const Dashboard: React.FC = () => {
         animate={{ opacity: 1, scale: 1 }}
         className="glass-panel rounded-[2.5rem] p-8 md:p-10 relative overflow-hidden group shadow-2xl border-white/10"
       >
-        <div className="absolute top-2 right-6 flex items-center gap-2 pointer-events-none opacity-40 grayscale group-hover:grayscale-0 transition-all">
+        <div className="absolute top-4 right-6 flex items-center gap-2 pointer-events-none opacity-40 grayscale group-hover:grayscale-0 transition-all">
           <span className="text-[7px] font-black text-white/50 uppercase tracking-[0.2em]">Partner Node:</span>
           <div className="flex gap-2">
             <span className="text-[8px] font-black text-blue-400">GCash</span>
@@ -171,18 +171,18 @@ export const Dashboard: React.FC = () => {
         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 blur-[80px] -z-10 rounded-full select-none pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-500/10 blur-[80px] -z-10 rounded-full select-none pointer-events-none" />
         
-        <div className="flex justify-between items-start mb-8 md:mb-10">
+        <div className="flex justify-between items-start mb-8 md:mb-10 pt-2">
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] md:text-xs font-black tracking-[0.4em] text-slate-500 uppercase">Cryptographic Balance</span>
-            <span className="text-white/40 text-[8px] md:text-[9px] font-bold uppercase tracking-widest leading-none">Secured via SHA-256 Node</span>
+            <span className="text-[9px] sm:text-[10px] md:text-xs font-black tracking-[0.4em] text-slate-500 uppercase">Cryptographic Balance</span>
+            <span className="text-white/40 text-[7px] sm:text-[8px] md:text-[9px] font-bold uppercase tracking-widest leading-none">Secured via SHA-256 Node</span>
           </div>
           <div className="flex flex-col items-end gap-1">
             <span className="bg-emerald-500/10 text-emerald-400 text-[9px] px-3 py-1 rounded-full border border-emerald-500/20 font-black tracking-widest shadow-xl shadow-emerald-900/10">ACTIVE</span>
           </div>
         </div>
         
-        <div className="flex flex-col gap-2 mb-10 md:mb-12">
-          <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter leading-none break-all">
+        <div className="flex flex-col gap-2 mb-10 md:mb-12 min-w-0">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tighter leading-tight whitespace-nowrap overflow-hidden text-ellipsis">
             {formatCurrency(userData.balance)}
           </h2>
           <p className="text-[10px] text-slate-600 font-black uppercase tracking-[0.3em]">Institutional Liquidity Pool</p>
@@ -191,14 +191,14 @@ export const Dashboard: React.FC = () => {
         <div className="grid grid-cols-2 gap-4 md:gap-5">
           <button 
             onClick={() => navigate('/deposit')}
-            className="py-5 bg-blue-600 hover:bg-blue-500 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] text-white shadow-2xl shadow-blue-900/50 transition-all active:scale-95 flex items-center justify-center gap-2"
+            className="py-4 sm:py-5 bg-blue-600 hover:bg-blue-500 rounded-[1.5rem] text-xs font-black uppercase tracking-[0.2em] text-white shadow-2xl shadow-blue-900/50 transition-all active:scale-95 flex items-center justify-center gap-2"
           >
             <ArrowDownLeft className="w-4 h-4" />
             Inject
           </button>
           <button 
             onClick={() => navigate('/withdraw')}
-            className="py-5 bg-white/5 hover:bg-white/10 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] text-white border border-white/10 transition-all active:scale-95 flex items-center justify-center gap-2 backdrop-blur-md"
+            className="py-4 sm:py-5 bg-white/5 hover:bg-white/10 rounded-[1.5rem] text-xs font-black uppercase tracking-[0.2em] text-white border border-white/10 transition-all active:scale-95 flex items-center justify-center gap-2 backdrop-blur-md"
           >
             <ArrowUpRight className="w-4 h-4" />
             Extract

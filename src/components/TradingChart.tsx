@@ -122,8 +122,8 @@ export const TradingChart: React.FC = () => {
 
       {/* Main Pricing Section */}
       <div className="flex justify-between items-end relative z-10">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-5xl md:text-6xl font-black text-white tracking-tighter leading-none break-all">
+        <div className="flex flex-col gap-1 min-w-0">
+          <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl font-black text-white tracking-tighter leading-tight whitespace-nowrap overflow-hidden text-ellipsis">
             ₱{currentPrice.toLocaleString(undefined, { minimumFractionDigits: 0 })}
           </h1>
           <div className={`flex items-center gap-2 md:gap-3 font-black ${isPositive ? 'text-emerald-400' : 'text-red-400'}`}>

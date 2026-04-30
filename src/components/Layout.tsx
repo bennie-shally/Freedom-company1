@@ -23,7 +23,7 @@ export const Layout: React.FC = () => {
 
       {!hideNav && !isAdminPage && <TopNav />}
       
-      <main className={`flex-1 relative z-10 ${!hideNav && !isAdminPage ? 'pt-20 pb-24' : ''}`}>
+      <main className={`flex-1 relative z-10 ${!hideNav && !isAdminPage ? 'pt-16 sm:pt-20 pb-20 sm:pb-24' : ''}`}>
         <Outlet />
       </main>
 

@@ -24,24 +24,24 @@ export const TopNav: React.FC = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 h-20 bg-slate-900/80 border-b border-white/5 backdrop-blur-md px-6 flex items-center justify-between">
-      <Link to="/" className="flex items-center gap-2">
-        <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/20">F</div>
-        <span className="font-bold tracking-tight text-white text-lg">FREEDOM</span>
+    <header className="fixed top-0 left-0 right-0 z-50 h-16 sm:h-20 bg-slate-900/80 border-b border-white/5 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between">
+      <Link to="/" className="flex items-center gap-1.5 sm:gap-2">
+        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-blue-600 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/20 text-sm sm:text-base">F</div>
+        <span className="font-bold tracking-tight text-white text-base sm:text-lg">FREEDOM</span>
       </Link>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4">
         {userData && (
-          <div className="flex flex-col items-end mr-2">
-            <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Available</span>
-            <span className="text-base font-bold text-blue-400">{formatCurrency(userData.balance)}</span>
+          <div className="flex flex-col items-end mr-1 sm:mr-2">
+            <span className="text-[8px] sm:text-[10px] text-slate-400 uppercase font-black tracking-wider leading-none">Available</span>
+            <span className="text-sm sm:text-base font-black text-blue-400 leading-tight">{formatCurrency(userData.balance)}</span>
           </div>
         )}
         <button 
           onClick={() => setIsOpen(!isOpen)}
-          className="p-2.5 bg-slate-800 rounded-xl border border-white/5 text-slate-400 hover:text-white transition-all active:scale-95"
+          className="p-2 sm:p-2.5 bg-slate-800 rounded-lg sm:rounded-xl border border-white/5 text-slate-400 hover:text-white transition-all active:scale-95"
         >
-          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          {isOpen ? <X className="h-5 w-5 sm:h-6 sm:w-6" /> : <Menu className="h-5 w-5 sm:h-6 sm:w-6" />}
         </button>
       </div>
 
