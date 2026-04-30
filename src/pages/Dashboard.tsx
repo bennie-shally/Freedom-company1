@@ -8,18 +8,61 @@ import { collection, query, where, onSnapshot, doc, updateDoc, increment, getDoc
 import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { formatCurrency, cn } from '../lib/utils';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Wallet, TrendingUp, Users, ArrowUpRight, ArrowDownLeft, Clock, Zap } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Investment } from '../types';
 import { handleFirestoreError, OperationType } from '../lib/errorHandlers';
 import { TradingChart } from '../components/TradingChart';
 
+// Real-time Simulated Payout Pool (100+ items)
+const PAYOUT_POOL = [
+  { user: "Juan D.", amount: "₱15,000" }, { user: "Maria C.", amount: "₱8,500" },
+  { user: "Ricardo S.", amount: "₱25,000" }, { user: "Elena G.", amount: "₱12,000" },
+  { user: "Paolo M.", amount: "₱50,000" }, { user: "Sarah L.", amount: "₱4,200" },
+  { user: "Benji K.", amount: "₱9,000" }, { user: "Chris T.", amount: "₱18,500" },
+  { user: "Dina V.", amount: "₱30,000" }, { user: "Emman R.", amount: "₱2,500" },
+  { user: "Flexi J.", amount: "₱11,000" }, { user: "Gelo P.", amount: "₱7,800" },
+  { user: "Hanz B.", amount: "₱45,000" }, { user: "Ivy W.", amount: "₱13,200" },
+  { user: "Jojo F.", amount: "₱6,000" }, { user: "Kiko L.", amount: "₱22,000" },
+  { user: "Lina M.", amount: "₱16,500" }, { user: "Manny P.", amount: "₱100,000" },
+  { user: "Nico S.", amount: "₱3,500" }, { user: "Odie R.", amount: "₱14,000" },
+  { user: "Pia G.", amount: "₱28,000" }, { user: "Quinn D.", amount: "₱9,500" },
+  { user: "Renz V.", amount: "₱17,000" }, { user: "Santi L.", amount: "₱5,000" },
+  { user: "Toni C.", amount: "₱12,500" }, { user: "Uly B.", amount: "₱8,900" },
+  { user: "Vina K.", amount: "₱21,000" }, { user: "Wally G.", amount: "₱35,000" },
+  { user: "Xander M.", amount: "₱4,800" }, { user: "Yani R.", amount: "₱15,500" },
+  { user: "Zack P.", amount: "₱60,000" }, { user: "Abby S.", amount: "₱7,200" },
+  { user: "Bobby J.", amount: "₱19,000" }, { user: "Cathy T.", amount: "₱11,500" },
+  { user: "Danny L.", amount: "₱33,000" }, { user: "Erika F.", amount: "₱5,500" },
+  { user: "Fred G.", amount: "₱40,000" }, { user: "Gina M.", amount: "₱14,500" },
+  { user: "Harry D.", amount: "₱2,200" }, { user: "Isay C.", amount: "₱18,000" },
+  { user: "Jake V.", amount: "₱25,500" }, { user: "Karl R.", amount: "₱9,200" },
+  { user: "Liza S.", amount: "₱12,800" }, { user: "Mike O.", amount: "₱48,000" },
+  { user: "Neneng B.", amount: "₱3,800" }, { user: "Oscar L.", amount: "₱16,000" },
+  { user: "Precious T.", amount: "₱22,500" }, { user: "Qer R.", amount: "₱7,000" },
+  { user: "Roly S.", amount: "₱13,500" }, { user: "Sally B.", amount: "₱30,500" },
+  { user: "Tim K.", amount: "₱5,800" }, { user: "Uma J.", amount: "₱11,200" },
+  { user: "Vince P.", amount: "₱27,000" }, { user: "Weng M.", amount: "₱4,500" },
+  { user: "Xena G.", amount: "₱19,500" }, { user: "Yuri F.", amount: "₱15,200" },
+  { user: "Zoren D.", amount: "₱38,000" }
+];
+
 export const Dashboard: React.FC = () => {
   const { user, userData } = useAuth();
   const [activeInvestments, setActiveInvestments] = useState<Investment[]>([]);
   const [recentHistory, setRecentHistory] = useState<any[]>([]);
+  const [activePayouts, setActivePayouts] = useState(PAYOUT_POOL.slice(0, 5));
   const navigate = useNavigate();
+
+  // Rotate payouts every 3 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const start = Math.floor(Math.random() * (PAYOUT_POOL.length - 5));
+      setActivePayouts(PAYOUT_POOL.slice(start, start + 5));
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -116,29 +159,36 @@ export const Dashboard: React.FC = () => {
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="glass-panel rounded-[2.5rem] p-10 relative overflow-hidden group shadow-2xl border-white/10"
+        className="glass-panel rounded-[2.5rem] p-8 md:p-10 relative overflow-hidden group shadow-2xl border-white/10"
       >
+        <div className="absolute top-2 right-6 flex items-center gap-2 pointer-events-none opacity-40 grayscale group-hover:grayscale-0 transition-all">
+          <span className="text-[7px] font-black text-white/50 uppercase tracking-[0.2em]">Partner Node:</span>
+          <div className="flex gap-2">
+            <span className="text-[8px] font-black text-blue-400">GCash</span>
+            <span className="text-[8px] font-black text-emerald-400">Maya</span>
+          </div>
+        </div>
         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 blur-[80px] -z-10 rounded-full select-none pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-500/10 blur-[80px] -z-10 rounded-full select-none pointer-events-none" />
         
-        <div className="flex justify-between items-start mb-10">
+        <div className="flex justify-between items-start mb-8 md:mb-10">
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-black tracking-[0.4em] text-slate-500 uppercase">Cryptographic Balance</span>
-            <span className="text-white/40 text-[9px] font-bold uppercase tracking-widest">Secured via SHA-256</span>
+            <span className="text-[10px] md:text-xs font-black tracking-[0.4em] text-slate-500 uppercase">Cryptographic Balance</span>
+            <span className="text-white/40 text-[8px] md:text-[9px] font-bold uppercase tracking-widest leading-none">Secured via SHA-256 Node</span>
           </div>
           <div className="flex flex-col items-end gap-1">
-            <span className="bg-emerald-500/10 text-emerald-400 text-[9px] px-3 py-1 rounded-full border border-emerald-500/20 font-black tracking-widest shadow-xl shadow-emerald-900/10">ACTIVE SYNC</span>
+            <span className="bg-emerald-500/10 text-emerald-400 text-[9px] px-3 py-1 rounded-full border border-emerald-500/20 font-black tracking-widest shadow-xl shadow-emerald-900/10">ACTIVE</span>
           </div>
         </div>
         
-        <div className="flex flex-col gap-2 mb-12">
-          <h2 className="text-5xl font-black text-white tracking-tighter leading-none">
+        <div className="flex flex-col gap-2 mb-10 md:mb-12">
+          <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter leading-none break-all">
             {formatCurrency(userData.balance)}
           </h2>
           <p className="text-[10px] text-slate-600 font-black uppercase tracking-[0.3em]">Institutional Liquidity Pool</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-5">
+        <div className="grid grid-cols-2 gap-4 md:gap-5">
           <button 
             onClick={() => navigate('/deposit')}
             className="py-5 bg-blue-600 hover:bg-blue-500 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.2em] text-white shadow-2xl shadow-blue-900/50 transition-all active:scale-95 flex items-center justify-center gap-2"
@@ -203,19 +253,36 @@ export const Dashboard: React.FC = () => {
       </section>
 
       {/* Quick Menu Grid */}
-      <div className="grid grid-cols-4 gap-4 mt-2">
-        <MenuIcon emoji="📈" label="Plans" onClick={() => navigate('/plans')} />
-        <MenuIcon emoji="👥" label="Referral" onClick={() => navigate('/referral')} />
-        <MenuIcon emoji="📜" label="History" onClick={() => navigate('/history')} />
+      <div className="grid grid-cols-4 gap-3 md:gap-4 mt-2">
+        <MenuIcon emoji="📈" label="Invest" onClick={() => navigate('/plans')} />
+        <MenuIcon emoji="👥" label="Affiliate" onClick={() => navigate('/referral')} />
+        <MenuIcon emoji="📜" label="Logs" onClick={() => navigate('/history')} />
         <MenuIcon emoji="💬" label="Support" onClick={() => navigate('/chat')} />
       </div>
 
       {/* Live Payouts (Social Proof) */}
       <section className="flex flex-col gap-4">
-        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Live Payouts</h3>
-        <div className="space-y-3">
-          <PayoutItem user="Maria***" amount="₱8,500.00" />
-          <PayoutItem user="Kevin***" amount="₱12,000.00" />
+        <div className="flex justify-between items-center px-2">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Live Payouts</h3>
+          </div>
+          <span className="text-[8px] font-black text-blue-400 bg-blue-400/5 px-2 py-0.5 rounded-md border border-blue-400/10">ACTIVITY: HIGH</span>
+        </div>
+        <div className="flex flex-col gap-3">
+          <AnimatePresence mode="popLayout">
+            {activePayouts.map((payout, i) => (
+              <motion.div
+                key={`${payout.user}-${i}`}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                transition={{ duration: 0.3 }}
+              >
+                <PayoutItem user={payout.user} amount={payout.amount} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
       </section>
     </div>
@@ -232,9 +299,20 @@ const MenuIcon = ({ emoji, label, onClick }: { emoji: string, label: string, onC
 );
 
 const PayoutItem = ({ user, amount }: { user: string, amount: string }) => (
-  <div className="flex justify-between items-center text-[10px] bg-emerald-500/5 p-3 rounded-xl border border-emerald-500/10">
-    <span className="text-slate-400 font-medium">{user} just withdrew</span>
-    <span className="text-emerald-400 font-black">{amount} via GCash</span>
+  <div className="flex justify-between items-center bg-[#0C121D] p-4 rounded-2xl border border-white/5 shadow-inner group">
+    <div className="flex items-center gap-3">
+      <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-[10px]">
+        ✅
+      </div>
+      <div className="flex flex-col">
+        <span className="text-[10px] text-white font-black tracking-tight">{user}</span>
+        <span className="text-[8px] text-slate-600 font-bold uppercase tracking-widest">Withdrawal Successful</span>
+      </div>
+    </div>
+    <div className="flex flex-col items-end">
+      <span className="text-emerald-400 font-black text-xs">+{amount}</span>
+      <span className="text-[8px] text-emerald-500/50 font-black uppercase tracking-tighter">via GCash</span>
+    </div>
   </div>
 );
 

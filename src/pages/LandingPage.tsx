@@ -47,23 +47,23 @@ export const LandingPage: React.FC = () => {
         title="Admin Entry"
       />
       {/* Hero Section */}
-      <section className="px-8 pt-16 text-center relative">
+      <section className="px-6 md:px-8 pt-10 md:pt-16 text-center relative max-w-lg mx-auto">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="flex flex-col items-center gap-8"
+          className="flex flex-col items-center gap-6 md:gap-8"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-[0.3em] shadow-lg">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] shadow-lg">
             <ShieldCheck className="w-3.5 h-3.5" />
-            Vercel Powered Security
+            Vercel Powered Nodes
           </div>
-          <h1 className="text-5xl font-black tracking-tighter leading-[0.95] text-white">
-            Freedom <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">Company</span> Ecosystem
+          <h1 className="text-4xl md:text-5xl font-black tracking-tighter leading-[0.9] text-white">
+            Freedom <span className="text-blue-400">Company</span> Ecosystem
           </h1>
-          <p className="text-slate-400 max-w-xs mx-auto text-sm leading-relaxed font-medium">
-            The Philippines' most trusted investment platform. Experience seamless cycles with instant GCash integration and secure payouts.
+          <p className="text-slate-400 max-w-[280px] md:max-w-xs mx-auto text-xs md:text-sm leading-relaxed font-medium">
+            The Philippines' most trusted investment platform. Experience seamless cycles with GCash integration.
           </p>
-          <div className="flex flex-col w-full max-w-sm gap-4">
+          <div className="flex flex-col w-full gap-3 md:gap-4 mt-2">
             <Link 
               to={user ? "/dashboard" : "/register"}
               className="py-5 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-3xl flex items-center justify-center gap-3 shadow-2xl shadow-blue-900/40 active:scale-95 transition-all text-sm uppercase tracking-widest"

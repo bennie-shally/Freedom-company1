@@ -101,43 +101,43 @@ export const TradingChart: React.FC = () => {
     <motion.div 
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="bg-[#05070A] p-8 rounded-[2.5rem] border border-white/5 relative overflow-hidden flex flex-col gap-8 shadow-2xl"
+      className="bg-[#05070A] p-6 md:p-8 rounded-[2.5rem] border border-white/5 relative overflow-hidden flex flex-col gap-6 md:gap-8 shadow-2xl"
     >
       {/* Header */}
       <div className="flex justify-between items-start relative z-10">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20 shadow-inner">
-            <Activity className="w-6 h-6 text-blue-500" />
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20 shadow-inner">
+            <Activity className="w-5 h-5 md:w-6 md:h-6 text-blue-500" />
           </div>
           <div className="flex flex-col">
-            <h3 className="text-xl font-black text-white tracking-tight">LIVE Market</h3>
-            <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">PHP / Index Exchange</span>
+            <h3 className="text-lg md:text-xl font-black text-white tracking-tight">LIVE Market</h3>
+            <span className="text-[9px] md:text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">PHP / Index Exchange</span>
           </div>
         </div>
-        <div className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
-          <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em]">LIVE</span>
+        <div className="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center gap-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+          <span className="text-[9px] font-black text-emerald-500 uppercase tracking-[0.2em]">LIVE</span>
         </div>
       </div>
 
       {/* Main Pricing Section */}
       <div className="flex justify-between items-end relative z-10">
         <div className="flex flex-col gap-1">
-          <h1 className="text-6xl font-black text-white tracking-tighter">
+          <h1 className="text-5xl md:text-6xl font-black text-white tracking-tighter leading-none break-all">
             ₱{currentPrice.toLocaleString(undefined, { minimumFractionDigits: 0 })}
           </h1>
-          <div className={`flex items-center gap-3 font-black ${isPositive ? 'text-emerald-400' : 'text-red-400'}`}>
+          <div className={`flex items-center gap-2 md:gap-3 font-black ${isPositive ? 'text-emerald-400' : 'text-red-400'}`}>
             <div className="flex items-center">
-              {isPositive ? <ArrowUpRight className="w-6 h-6" /> : <ArrowDownRight className="w-6 h-6" />}
-              <span className="text-xl">+₱{changeVal.toLocaleString()}</span>
+              {isPositive ? <ArrowUpRight className="w-5 h-5 md:w-6 md:h-6" /> : <ArrowDownRight className="w-5 h-5 md:w-6 md:h-6" />}
+              <span className="text-lg md:text-xl">+{changeVal.toLocaleString()}</span>
             </div>
-            <span className="bg-white/5 border border-white/10 px-3 py-1 rounded-lg text-sm tracking-tight font-mono">
+            <span className="bg-white/5 border border-white/10 px-2 py-0.5 md:px-3 md:py-1 rounded-lg text-xs md:text-sm tracking-tight font-mono">
               ({isPositive ? '+' : ''}{change}%)
             </span>
           </div>
         </div>
         
-        <div className="flex flex-col gap-1.5 text-[11px] font-black uppercase text-slate-500 items-end mb-2">
+        <div className="hidden sm:flex flex-col gap-1.5 text-[11px] font-black uppercase text-slate-500 items-end mb-2">
           <div className="flex gap-4">
             <span className="tracking-[0.2em] opacity-40">High:</span>
             <span className="text-white tracking-tight">₱{stats.high.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
