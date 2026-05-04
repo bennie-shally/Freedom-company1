@@ -57,10 +57,10 @@ export const LandingPage: React.FC = () => {
             <ShieldCheck className="w-3.5 h-3.5" />
             Vercel Powered Nodes
           </div>
-          <h1 className="text-4xl md:text-6xl font-black tracking-tighter leading-[0.9] text-white">
+          <h1 className="text-4xl md:text-5xl font-black tracking-tighter leading-[0.9] text-white">
             Freedom <span className="text-blue-400">Company</span> Ecosystem
           </h1>
-          <p className="text-slate-400 max-w-[280px] md:max-w-sm mx-auto text-xs md:text-sm leading-relaxed font-medium">
+          <p className="text-slate-400 max-w-[280px] md:max-w-xs mx-auto text-xs md:text-sm leading-relaxed font-medium">
             The Philippines' most trusted investment platform. Experience seamless cycles with GCash integration.
           </p>
           <div className="flex flex-col w-full gap-3 md:gap-4 mt-2">
@@ -68,56 +68,17 @@ export const LandingPage: React.FC = () => {
               to={user ? "/dashboard" : "/register"}
               className="py-5 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-3xl flex items-center justify-center gap-3 shadow-2xl shadow-blue-900/40 active:scale-95 transition-all text-sm uppercase tracking-widest"
             >
-              Start Earning Now
+              Start Your First Cycle
               <ChevronRight className="w-5 h-5" />
+            </Link>
+            <Link 
+              to="/login"
+              className="py-5 bg-white/5 border border-white/10 text-white font-black rounded-3xl flex items-center justify-center shadow-lg active:scale-95 transition-all text-sm uppercase tracking-widest"
+            >
+              Sign In to Account
             </Link>
           </div>
         </motion.div>
-      </section>
-
-      {/* Hype/About Section (Like JUSTFedEx Post) */}
-      <section className="px-6">
-        <div className="glass-panel border-white/10 rounded-[2.5rem] p-8 md:p-10 bg-slate-900 shadow-2xl">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl font-black text-white tracking-widest mb-2">JUST FREEDOM</h2>
-            <p className="text-blue-400 font-black text-lg animate-bounce">( USE FREE ) 🚀</p>
-          </div>
-          
-          <div className="space-y-6 text-sm font-medium text-slate-300 leading-relaxed">
-            <p className="text-white font-bold text-base">Have you heard about Freedom Company before?</p>
-            
-            <p>
-              Freedom is a High-Performance Ecosystem where you can generate multiple wealth tracking results.
-              <br />
-              <span className="text-white font-bold">Design, Features & Templates Are Crazy 🫶</span>
-            </p>
-            
-            <p className="italic text-slate-400">You can now grow your own capital using Freedom for FREE</p>
-            
-            <div className="space-y-3 py-4">
-              <h3 className="text-white font-black uppercase tracking-widest text-xs">What It Comes With?</h3>
-              <ul className="space-y-2">
-                <li className="flex items-center gap-3">1) Full Admin Managements 🚀</li>
-                <li className="flex items-center gap-3">2) Access To Trade Unlimited Indices 🚀</li>
-                <li className="flex items-center gap-3">3) Billing Methods Fully Verified 🚀</li>
-                <li className="flex items-center gap-3">4) Live Support Chat & Custom Support 🚀</li>
-                <li className="flex items-center gap-3">5) Profit Ticket Generator 🚀</li>
-                <li className="flex items-center gap-3">6) Full App Custom Editing 🚀</li>
-                <li className="flex items-center gap-3">7) Unlimited Earning Creating 🚀</li>
-                <li className="flex items-center gap-3">8) Active GCash Alerts 🚀</li>
-              </ul>
-              <p className="text-slate-400 font-bold">And Many More Amazing Features. 📦</p>
-            </div>
-            
-            <div className="pt-6 border-t border-white/5 text-center">
-              <p className="text-white font-black leading-relaxed">
-                Freedom 🚛 Company Is The Best Recommendation For Your Wealth 
-                <br />
-                <span className="text-xl">😈 USE FREE NOW 😈</span>
-              </p>
-            </div>
-          </div>
-        </div>
       </section>
 
       {/* Live Activity Board */}
