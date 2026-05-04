@@ -143,7 +143,7 @@ export const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="p-5 sm:p-6 flex flex-col gap-10 pb-20 sm:pb-12">
+    <div className="p-5 sm:p-6 flex flex-col gap-12 pb-24 sm:pb-12">
       {/* User Hello */}
       <div className="flex justify-between items-center px-2">
         <div>
@@ -182,7 +182,7 @@ export const Dashboard: React.FC = () => {
         </div>
         
         <div className="flex flex-col gap-2 mb-10 md:mb-12 min-w-0">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tighter leading-tight whitespace-nowrap overflow-hidden text-ellipsis">
+          <h2 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tighter leading-tight whitespace-nowrap overflow-hidden text-ellipsis">
             {formatCurrency(userData.balance)}
           </h2>
           <p className="text-[10px] text-slate-600 font-black uppercase tracking-[0.3em]">Institutional Liquidity Pool</p>
