@@ -54,6 +54,7 @@ export const ChatPage: React.FC = () => {
       await setDoc(doc(db, 'chats', user.uid), {
         lastMessage: messageToSend,
         lastMessageAt: serverTimestamp(),
+        lastMessageSenderId: user.uid,
         username: userData?.username || 'User',
         updatedAt: serverTimestamp()
       }, { merge: true });

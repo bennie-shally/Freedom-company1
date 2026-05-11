@@ -6,27 +6,60 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { collection, addDoc, query, onSnapshot, doc, updateDoc, increment, getDoc, setDoc, orderBy, writeBatch, where, serverTimestamp, deleteDoc } from 'firebase/firestore';
-import { auth, db } from '../lib/firebase';
+import { auth, db, messaging } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
+import { useNotifications } from '../hooks/useNotifications';
 import { formatCurrency, cn } from '../lib/utils';
 import { 
   BarChart3, Users, Wallet, ReceiptText, Settings, MessageSquare, 
   Check, X, Eye, ArrowUpRight, ArrowDownLeft, Save, Plus, Trash2, 
   Menu as Hamburger, User as UserIcon, Shield as AdminShield,
-  ArrowLeft
+  ArrowLeft, Bell
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format } from 'date-fns';
 import { handleFirestoreError, OperationType } from '../lib/errorHandlers';
+import { onMessage } from 'firebase/messaging';
 
 type AdminTab = 'overview' | 'users' | 'plans' | 'deposits' | 'withdrawals' | 'settings' | 'chats';
 
 export const AdminDashboard: React.FC = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const { notificationPermission, requestPermission } = useNotifications();
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
+
+  // Global Chat Listener for Notifications
+  useEffect(() => {
+    if (!authenticated || !user) return;
+
+    // Listen to changes in the 'chats' collection
+    const q = query(collection(db, 'chats'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === 'modified') {
+          const chatData = change.doc.data();
+          // If the last message was NOT from admin, it's a new client message
+          // Check timestamp to avoid showing old notifications on first load
+          const lastMessageAt = chatData.lastMessageAt?.toDate?.() || new Date(chatData.lastMessageAt);
+          const isRecent = (new Date().getTime() - lastMessageAt.getTime()) < 10000; // within 10s
+
+          if (isRecent && chatData.lastMessageSenderId !== 'admin') {
+            if (Notification.permission === 'granted') {
+              new Notification(`New Message from ${chatData.username || 'User'}`, {
+                body: chatData.lastMessage,
+                icon: '/logo.png'
+              });
+            }
+          }
+        }
+      });
+    }, (err) => handleFirestoreError(err, OperationType.LIST, 'chats_notifications'));
+
+    return () => unsubscribe();
+  }, [authenticated, user]);
 
   // Auth check
   useEffect(() => {
@@ -82,6 +115,14 @@ export const AdminDashboard: React.FC = () => {
       {/* Sidebar - Desktop */}
       <aside className="hidden md:flex w-64 flex-col bg-brand-muted/50 border-r border-white/5 p-6 gap-8">
         <Logo />
+        {notificationPermission !== 'granted' && (
+          <button 
+            onClick={requestPermission}
+            className="flex items-center gap-3 p-4 bg-orange-400 text-black rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-orange-300 transition-all animate-pulse shadow-lg"
+          >
+            <Bell className="w-4 h-4" /> Enable Notifications
+          </button>
+        )}
         <nav className="flex flex-col gap-2">
           <SidebarLink active={activeTab === 'overview'} icon={<BarChart3 className="w-5 h-5"/>} label="Overview" onClick={() => setActiveTab('overview')} />
           <SidebarLink active={activeTab === 'users'} icon={<Users className="w-5 h-5"/>} label="Users" onClick={() => setActiveTab('users')} />
@@ -715,6 +756,7 @@ const AdminChats = () => {
         batch.update(doc(db, 'chats', selectedChatId), {
             lastMessage: text,
             lastMessageAt: serverTimestamp(),
+            lastMessageSenderId: 'admin',
             updatedAt: serverTimestamp()
         });
         

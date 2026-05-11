@@ -13,6 +13,7 @@
         "referralCode": { "type": "string" },
         "referredBy": { "type": "string", "description": "UID of the referrer" },
         "role": { "type": "string", "enum": ["user", "admin"] },
+        "fcmToken": { "type": "string", "description": "FCM device token for push notifications" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["uid", "username", "balance", "role"]

@@ -91,7 +91,7 @@ service cloud.firestore {
       allow create: if isOwner(userId) && isValidUser(incoming()) && incoming().role == 'user' && incoming().balance == 0;
       allow update: if (isAdmin() && incoming().diff(existing()).affectedKeys().hasAny(['balance', 'totalEarnings', 'role', 'status'])) || (
         isOwner(userId) && 
-        incoming().diff(existing()).affectedKeys().hasOnly(['username', 'balance', 'totalEarnings', 'phoneNumber'])
+        incoming().diff(existing()).affectedKeys().hasOnly(['username', 'balance', 'totalEarnings', 'phoneNumber', 'fcmToken', 'lastTokenSync'])
       ) || (
         // Referral bonus logic: allow a new user to update their referrer's balance
         isSignedIn() &&
