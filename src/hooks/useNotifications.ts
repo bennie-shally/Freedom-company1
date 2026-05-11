@@ -30,24 +30,42 @@ export const useNotifications = () => {
     if (!messaging || !auth.currentUser) return;
 
     try {
-      const token = await getToken(messaging, {
-        vapidKey: VAPID_KEY,
-      });
+      // Explicitly register service worker for broader compatibility
+      if ('serviceWorker' in navigator) {
+        const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+        console.log('Service Worker registered with scope:', registration.scope);
 
-      if (token) {
-        setFcmToken(token);
-        // Save token to user profile
-        const userRef = doc(db, 'users', auth.currentUser.uid);
-        await updateDoc(userRef, {
-          fcmToken: token,
-          lastTokenSync: new Date().toISOString()
+        const token = await getToken(messaging, {
+          vapidKey: VAPID_KEY,
+          serviceWorkerRegistration: registration,
         });
-        console.log('FCM Token registered and saved:', token);
-      } else {
-        console.warn('No registration token available. Request permission to generate one.');
+
+        if (token) {
+          setFcmToken(token);
+          // Save token to user profile
+          const userRef = doc(db, 'users', auth.currentUser.uid);
+          await updateDoc(userRef, {
+            fcmToken: token,
+            lastTokenSync: new Date().toISOString()
+          });
+          console.log('FCM Token registered and saved:', token);
+        } else {
+          console.warn('No registration token available.');
+        }
       }
     } catch (error) {
       console.error('Error getting FCM token:', error);
+    }
+  };
+
+  const showTestNotification = () => {
+    if (Notification.permission === 'granted') {
+      new Notification('Test Notification', {
+        body: 'If you see this, notifications are working correctly on your browser!',
+        icon: '/logo.png'
+      });
+    } else {
+      alert('Notification permission not granted. Please click "Enable Notifications" first.');
     }
   };
 
@@ -83,5 +101,6 @@ export const useNotifications = () => {
     fcmToken,
     notificationPermission,
     requestPermission,
+    showTestNotification
   };
 };

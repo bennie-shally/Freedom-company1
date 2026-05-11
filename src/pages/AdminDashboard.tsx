@@ -26,7 +26,7 @@ type AdminTab = 'overview' | 'users' | 'plans' | 'deposits' | 'withdrawals' | 's
 export const AdminDashboard: React.FC = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
-  const { notificationPermission, requestPermission } = useNotifications();
+  const { notificationPermission, requestPermission, showTestNotification } = useNotifications();
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
@@ -43,14 +43,30 @@ export const AdminDashboard: React.FC = () => {
           const chatData = change.doc.data();
           // If the last message was NOT from admin, it's a new client message
           // Check timestamp to avoid showing old notifications on first load
-          const lastMessageAt = chatData.lastMessageAt?.toDate?.() || new Date(chatData.lastMessageAt);
-          const isRecent = (new Date().getTime() - lastMessageAt.getTime()) < 10000; // within 10s
+          let lastMessageAt: Date;
+          
+          if (chatData.lastMessageAt?.toDate) {
+            lastMessageAt = chatData.lastMessageAt.toDate();
+          } else if (chatData.lastMessageAt instanceof Date) {
+            lastMessageAt = chatData.lastMessageAt;
+          } else if (typeof chatData.lastMessageAt === 'string') {
+            lastMessageAt = new Date(chatData.lastMessageAt);
+          } else {
+            return; // Can't determine time
+          }
+
+          const now = new Date().getTime();
+          const msgTime = lastMessageAt.getTime();
+          const isRecent = (now - msgTime) < 15000; // within 15s
 
           if (isRecent && chatData.lastMessageSenderId !== 'admin') {
+            console.log('Sending notification for new message:', chatData.lastMessage);
             if (Notification.permission === 'granted') {
               new Notification(`New Message from ${chatData.username || 'User'}`, {
                 body: chatData.lastMessage,
-                icon: '/logo.png'
+                icon: '/logo.png',
+                tag: change.doc.id, // Prevent duplicate notifications for same chat
+                renotify: true
               });
             }
           }
@@ -115,12 +131,19 @@ export const AdminDashboard: React.FC = () => {
       {/* Sidebar - Desktop */}
       <aside className="hidden md:flex w-64 flex-col bg-brand-muted/50 border-r border-white/5 p-6 gap-8">
         <Logo />
-        {notificationPermission !== 'granted' && (
+        {notificationPermission !== 'granted' ? (
           <button 
             onClick={requestPermission}
             className="flex items-center gap-3 p-4 bg-orange-400 text-black rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-orange-300 transition-all animate-pulse shadow-lg"
           >
             <Bell className="w-4 h-4" /> Enable Notifications
+          </button>
+        ) : (
+          <button 
+            onClick={showTestNotification}
+            className="flex items-center gap-3 p-4 bg-emerald-400/10 text-emerald-400 border border-emerald-400/20 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-emerald-400/20 transition-all"
+          >
+            <Bell className="w-4 h-4" /> Test Notification
           </button>
         )}
         <nav className="flex flex-col gap-2">
