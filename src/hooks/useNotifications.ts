@@ -58,16 +58,33 @@ export const useNotifications = () => {
     }
   };
 
-  const showTestNotification = () => {
+  const playNotificationSound = () => {
+    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+    audio.play().catch(e => console.warn('Sound play blocked by browser', e));
+  };
+
+  const showTestNotification = async () => {
     if (Notification.permission === 'granted') {
-      const notification = new Notification('Test Notification', {
-        body: 'If you see this, notifications are working correctly on your browser!',
-        icon: '/logo.png'
-      });
-      notification.onclick = () => {
-        window.focus();
-        notification.close();
-      };
+      playNotificationSound();
+      
+      if ('serviceWorker' in navigator) {
+        const registration = await navigator.serviceWorker.ready;
+        registration.showNotification('Test Notification', {
+          body: 'If you see this, notifications are working correctly on your browser!',
+          icon: '/logo.png',
+          vibrate: [200, 100, 200],
+          tag: 'test-notification'
+        });
+      } else {
+        const notification = new Notification('Test Notification', {
+          body: 'If you see this, notifications are working correctly on your browser!',
+          icon: '/logo.png'
+        });
+        notification.onclick = () => {
+          window.focus();
+          notification.close();
+        };
+      }
     } else {
       alert('Notification permission not granted. Please click "Enable Notifications" first.');
     }
@@ -78,19 +95,29 @@ export const useNotifications = () => {
 
     // Listen for foreground messages
     if (messaging) {
-      const unsubscribe = onMessage(messaging, (payload) => {
+      const unsubscribe = onMessage(messaging, async (payload) => {
         console.log('Foreground message received:', payload);
+        playNotificationSound();
         
         // Show a browser notification manually if in foreground
         if (Notification.permission === 'granted') {
-          const notification = new Notification(payload.notification?.title || 'New Message', {
-            body: payload.notification?.body || 'You have a new message.',
-            icon: '/logo.png'
-          });
-          notification.onclick = () => {
-            window.focus();
-            notification.close();
-          };
+          if ('serviceWorker' in navigator) {
+            const registration = await navigator.serviceWorker.ready;
+            registration.showNotification(payload.notification?.title || 'New Message', {
+              body: payload.notification?.body || 'You have a new message.',
+              icon: '/logo.png',
+              data: payload.data
+            });
+          } else {
+            const notification = new Notification(payload.notification?.title || 'New Message', {
+              body: payload.notification?.body || 'You have a new message.',
+              icon: '/logo.png'
+            });
+            notification.onclick = () => {
+              window.focus();
+              notification.close();
+            };
+          }
         }
       });
 

@@ -61,17 +61,34 @@ export const AdminDashboard: React.FC = () => {
 
           if (isRecent && chatData.lastMessageSenderId !== 'admin') {
             console.log('Sending notification for new message:', chatData.lastMessage);
+            
+            // Play sound
+            const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+            audio.play().catch(e => console.warn('Sound play blocked by browser', e));
+
             if (Notification.permission === 'granted') {
-              const notification = new Notification(`New Message from ${chatData.username || 'User'}`, {
-                body: chatData.lastMessage,
-                icon: '/logo.png',
-                tag: change.doc.id, // Prevent duplicate notifications for same chat
-                renotify: true
-              });
-              notification.onclick = () => {
-                window.focus();
-                notification.close();
-              };
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.ready.then(registration => {
+                  registration.showNotification(`New Message from ${chatData.username || 'User'}`, {
+                    body: chatData.lastMessage,
+                    icon: '/logo.png',
+                    tag: change.doc.id,
+                    renotify: true,
+                    data: { url: window.location.origin + '/admin' }
+                  });
+                });
+              } else {
+                const notification = new Notification(`New Message from ${chatData.username || 'User'}`, {
+                  body: chatData.lastMessage,
+                  icon: '/logo.png',
+                  tag: change.doc.id,
+                  renotify: true
+                });
+                notification.onclick = () => {
+                  window.focus();
+                  notification.close();
+                };
+              }
             }
           }
         }
