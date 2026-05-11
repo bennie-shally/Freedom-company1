@@ -60,10 +60,14 @@ export const useNotifications = () => {
 
   const showTestNotification = () => {
     if (Notification.permission === 'granted') {
-      new Notification('Test Notification', {
+      const notification = new Notification('Test Notification', {
         body: 'If you see this, notifications are working correctly on your browser!',
         icon: '/logo.png'
       });
+      notification.onclick = () => {
+        window.focus();
+        notification.close();
+      };
     } else {
       alert('Notification permission not granted. Please click "Enable Notifications" first.');
     }
@@ -79,10 +83,14 @@ export const useNotifications = () => {
         
         // Show a browser notification manually if in foreground
         if (Notification.permission === 'granted') {
-          new Notification(payload.notification?.title || 'New Message', {
+          const notification = new Notification(payload.notification?.title || 'New Message', {
             body: payload.notification?.body || 'You have a new message.',
             icon: '/logo.png'
           });
+          notification.onclick = () => {
+            window.focus();
+            notification.close();
+          };
         }
       });
 

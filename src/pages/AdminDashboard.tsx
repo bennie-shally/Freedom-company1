@@ -62,12 +62,16 @@ export const AdminDashboard: React.FC = () => {
           if (isRecent && chatData.lastMessageSenderId !== 'admin') {
             console.log('Sending notification for new message:', chatData.lastMessage);
             if (Notification.permission === 'granted') {
-              new Notification(`New Message from ${chatData.username || 'User'}`, {
+              const notification = new Notification(`New Message from ${chatData.username || 'User'}`, {
                 body: chatData.lastMessage,
                 icon: '/logo.png',
                 tag: change.doc.id, // Prevent duplicate notifications for same chat
                 renotify: true
               });
+              notification.onclick = () => {
+                window.focus();
+                notification.close();
+              };
             }
           }
         }
@@ -193,6 +197,26 @@ export const AdminDashboard: React.FC = () => {
                 <SidebarLink active={activeTab === 'withdrawals'} icon={<ArrowUpRight className="w-5 h-5"/>} label="Withdrawals" onClick={() => { setActiveTab('withdrawals'); setIsSidebarOpen(false); }} />
                 <SidebarLink active={activeTab === 'chats'} icon={<MessageSquare className="w-5 h-5"/>} label="Live Chats" onClick={() => { setActiveTab('chats'); setIsSidebarOpen(false); }} />
                 <SidebarLink active={activeTab === 'settings'} icon={<Settings className="w-5 h-5"/>} label="Settings" onClick={() => { setActiveTab('settings'); setIsSidebarOpen(false); }} />
+                
+                {/* Mobile Notification Button */}
+                <div className="mt-4">
+                  {notificationPermission !== 'granted' ? (
+                    <button 
+                      onClick={requestPermission}
+                      className="w-full flex items-center justify-center gap-3 p-4 bg-orange-400 text-black rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-orange-300 transition-all animate-pulse shadow-lg"
+                    >
+                      <Bell className="w-4 h-4" /> Enable Notifications
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={showTestNotification}
+                      className="w-full flex items-center justify-center gap-3 p-4 bg-emerald-400/10 text-emerald-400 border border-emerald-400/20 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-emerald-400/20 transition-all"
+                    >
+                      <Bell className="w-4 h-4" /> Test Notification
+                    </button>
+                  )}
+                </div>
+
                 <button 
                   onClick={async () => {
                     sessionStorage.removeItem('isAdminAuthenticated');
