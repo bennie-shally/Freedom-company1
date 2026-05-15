@@ -64,38 +64,38 @@ export const TopNav: React.FC = () => {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="fixed right-0 top-0 bottom-0 w-[85%] max-w-sm bg-gradient-to-br from-[#081225] to-[#0f1f45] border-l border-blue-500/20 z-50 p-8 flex flex-col gap-8 shadow-[-20px_0_50px_rgba(0,0,0,0.5)] backdrop-blur-3xl"
+              className="fixed right-0 top-0 bottom-0 w-[70%] max-w-[280px] bg-[#050b18] border-l border-blue-500/30 z-50 p-6 flex flex-col gap-5 shadow-[-20px_0_60px_rgba(0,0,0,0.8)] backdrop-blur-3xl"
             >
-              <div className="flex justify-between items-center text-white mt-4 px-2">
+              <div className="flex justify-between items-center text-white mt-6 px-1">
                 <div className="flex flex-col">
-                  <span className="font-black text-[10px] uppercase tracking-[0.4em] text-blue-400">Navigation</span>
-                  <span className="font-black text-xs uppercase tracking-[0.2em] text-slate-500">Main Control</span>
+                  <span className="font-black text-[9px] uppercase tracking-[0.3em] text-blue-400">Navigation</span>
+                  <span className="font-black text-[11px] uppercase tracking-[0.1em] text-slate-400">Control Panel</span>
                 </div>
                 <button 
                    onClick={() => setIsOpen(false)}
-                   className="p-3 bg-white/5 rounded-2xl border border-white/10 active:scale-90 transition-all text-white"
+                   className="p-2.5 bg-white/5 rounded-xl border border-white/10 active:scale-90 transition-all text-white"
                 >
-                  <X className="h-6 w-6" />
+                  <X className="h-5 w-5" />
                 </button>
               </div>
 
-              <div className="flex flex-col gap-1.5 mt-4">
-                <MenuLink to="/dashboard" active={location.pathname === '/dashboard'} icon={<TrendingUp className="h-5 w-5" />} label="Dashboard" onClick={() => setIsOpen(false)} />
-                <MenuLink to="/deposit" active={location.pathname === '/deposit'} icon={<Wallet className="h-5 w-5" />} label="Deposit" onClick={() => setIsOpen(false)} />
-                <MenuLink to="/withdraw" active={location.pathname === '/withdraw'} icon={<ReceiptText className="h-5 w-5" />} label="Withdraw" onClick={() => setIsOpen(false)} />
-                <MenuLink to="/plans" active={location.pathname === '/plans'} icon={<Zap className="h-5 w-5" />} label="Investment Plans" onClick={() => setIsOpen(false)} />
-                <MenuLink to="/loans" active={location.pathname === '/loans'} icon={<Banknote className="h-5 w-5" />} label="Loan Center" onClick={() => setIsOpen(false)} />
-                <MenuLink to="/history" active={location.pathname === '/history'} icon={<History className="h-5 w-5" />} label="Ledger History" onClick={() => setIsOpen(false)} />
-                <MenuLink to="/profile" active={location.pathname === '/profile'} icon={<UserCircle className="h-5 w-5" />} label="Secure ID" onClick={() => setIsOpen(false)} />
-                <MenuLink to="/chat" active={location.pathname === '/chat'} icon={<MessageSquare className="h-5 w-5" />} label="System Support" onClick={() => setIsOpen(false)} />
+              <div className="flex flex-col gap-1 mt-2">
+                <MenuLink to="/dashboard" active={location.pathname === '/dashboard'} icon={<TrendingUp className="h-4 w-4" />} label="Dashboard" onClick={() => setIsOpen(false)} />
+                <MenuLink to="/deposit" active={location.pathname === '/deposit'} icon={<Wallet className="h-4 w-4" />} label="Deposit" onClick={() => setIsOpen(false)} />
+                <MenuLink to="/withdraw" active={location.pathname === '/withdraw'} icon={<ReceiptText className="h-4 w-4" />} label="Withdraw" onClick={() => setIsOpen(false)} />
+                <MenuLink to="/plans" active={location.pathname === '/plans'} icon={<Zap className="h-4 w-4" />} label="Plans" onClick={() => setIsOpen(false)} />
+                <MenuLink to="/loans" active={location.pathname === '/loans'} icon={<Banknote className="h-4 w-4" />} label="Loans" onClick={() => setIsOpen(false)} />
+                <MenuLink to="/history" active={location.pathname === '/history'} icon={<History className="h-4 w-4" />} label="History" onClick={() => setIsOpen(false)} />
+                <MenuLink to="/profile" active={location.pathname === '/profile'} icon={<UserCircle className="h-4 w-4" />} label="Profile" onClick={() => setIsOpen(false)} />
+                <MenuLink to="/chat" active={location.pathname === '/chat'} icon={<MessageSquare className="h-4 w-4" />} label="Support" onClick={() => setIsOpen(false)} />
               </div>
 
-              <div className="mt-auto">
+              <div className="mt-auto pb-4">
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-4 text-red-500 font-black uppercase tracking-widest text-[10px] w-full p-6 bg-red-500/5 hover:bg-red-500/10 border border-red-500/10 rounded-[2rem] transition-all"
+                  className="flex items-center gap-3 text-red-500 font-black uppercase tracking-widest text-[9px] w-full p-4 bg-red-500/5 hover:bg-red-500/10 border border-red-500/10 rounded-2xl transition-all"
                 >
-                  <LogOut className="h-5 w-5" />
+                  <LogOut className="h-4 h-4" />
                   Logout
                 </button>
               </div>
@@ -112,20 +112,20 @@ const MenuLink: React.FC<{ to: string; active?: boolean; icon: React.ReactNode; 
     to={to}
     onClick={onClick}
     className={cn(
-      "flex items-center gap-5 p-4 rounded-[1.5rem] transition-all border group",
+      "flex items-center gap-4 p-3 rounded-2xl transition-all border group",
       active 
-        ? "bg-blue-600/10 border-blue-500/30 text-white shadow-[0_0_20px_rgba(37,99,235,0.1)]" 
-        : "bg-white/5 border-transparent text-slate-400 hover:text-white hover:bg-white/10 hover:border-white/10"
+        ? "bg-blue-600/15 border-blue-500/40 text-white shadow-[0_0_20px_rgba(37,99,235,0.15)]" 
+        : "bg-white/[0.03] border-transparent text-slate-400 hover:text-white hover:bg-white/[0.08] hover:border-white/10"
     )}
   >
     <div className={cn(
-      "p-2.5 rounded-xl transition-all",
+      "p-2 rounded-xl transition-all",
       active ? "bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)]" : "bg-white/5 text-blue-500 group-hover:text-blue-400"
     )}>
       {icon}
     </div>
     <span className={cn(
-      "font-black text-[10px] uppercase tracking-[0.2em] transition-colors",
+      "font-black text-[9px] uppercase tracking-[0.15em] transition-colors",
       active ? "text-white" : "text-slate-400 group-hover:text-white"
     )}>{label}</span>
   </Link>
