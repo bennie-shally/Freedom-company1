@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { collection, addDoc, query, onSnapshot, doc, updateDoc, increment, getDoc, setDoc, orderBy, writeBatch, where, serverTimestamp, deleteDoc } from 'firebase/firestore';
+import { collection, addDoc, query, onSnapshot, doc, updateDoc, increment, getDoc, getDocs, setDoc, orderBy, writeBatch, where, serverTimestamp, deleteDoc } from 'firebase/firestore';
 import { auth, db, messaging } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotifications } from '../hooks/useNotifications';
@@ -22,7 +22,7 @@ import { handleFirestoreError, OperationType } from '../lib/errorHandlers';
 import { onMessage } from 'firebase/messaging';
 import { LoanApplication } from '../types';
 
-type AdminTab = 'overview' | 'users' | 'plans' | 'deposits' | 'withdrawals' | 'settings' | 'chats' | 'loans';
+type AdminTab = 'overview' | 'users' | 'plans' | 'deposits' | 'withdrawals' | 'settings' | 'chats' | 'loans' | 'maintenance';
 
 export const AdminDashboard: React.FC = () => {
   const { user, loading } = useAuth();
@@ -177,6 +177,7 @@ export const AdminDashboard: React.FC = () => {
           <SidebarLink active={activeTab === 'loans'} icon={<Wallet className="w-5 h-5"/>} label="Loans" onClick={() => setActiveTab('loans')} />
           <SidebarLink active={activeTab === 'chats'} icon={<MessageSquare className="w-5 h-5"/>} label="Live Chats" onClick={() => setActiveTab('chats')} />
           <SidebarLink active={activeTab === 'settings'} icon={<Settings className="w-5 h-5"/>} label="System Settings" onClick={() => setActiveTab('settings')} />
+          <SidebarLink active={activeTab === 'maintenance'} icon={<Trash2 className="w-5 h-5"/>} label="Maintenance" onClick={() => setActiveTab('maintenance')} />
           <div className="mt-auto pt-4 border-t border-white/5">
             <button 
               onClick={async () => {
@@ -217,6 +218,7 @@ export const AdminDashboard: React.FC = () => {
                 <SidebarLink active={activeTab === 'loans'} icon={<Wallet className="w-5 h-5"/>} label="Loan Applications" onClick={() => { setActiveTab('loans'); setIsSidebarOpen(false); }} />
                 <SidebarLink active={activeTab === 'chats'} icon={<MessageSquare className="w-5 h-5"/>} label="Live Chats" onClick={() => { setActiveTab('chats'); setIsSidebarOpen(false); }} />
                 <SidebarLink active={activeTab === 'settings'} icon={<Settings className="w-5 h-5"/>} label="Settings" onClick={() => { setActiveTab('settings'); setIsSidebarOpen(false); }} />
+                <SidebarLink active={activeTab === 'maintenance'} icon={<Trash2 className="w-5 h-5"/>} label="Maintenance" onClick={() => { setActiveTab('maintenance'); setIsSidebarOpen(false); }} />
                 
                 {/* Mobile Notification Button */}
                 <div className="mt-4">
@@ -264,6 +266,7 @@ export const AdminDashboard: React.FC = () => {
         {activeTab === 'loans' && <AdminLoans />}
         {activeTab === 'settings' && <AdminSettings />}
         {activeTab === 'chats' && <AdminChats />}
+        {activeTab === 'maintenance' && <AdminMaintenance />}
       </main>
     </div>
   );
@@ -1030,3 +1033,158 @@ const AdminLoans = () => {
         </div>
     );
 };
+
+const AdminMaintenance = () => {
+    const [isResetting, setIsResetting] = useState(false);
+    const { user } = useAuth();
+
+    const handleSystemReset = async () => {
+        const confirmed = window.confirm(
+            "NUCLEAR WARNING: This will PERMANENTLY DELETE all user accounts, transaction histories, and support messages. " +
+            "Site settings and investment plans will be preserved. Your admin account will NOT be deleted. " +
+            "Are you absolutely sure?"
+        );
+        
+        if (!confirmed) return;
+
+        const secondConfirmation = window.confirm("Final check: Click 'OK' to initiate the full platform wipe and restart as a new site.");
+        if (!secondConfirmation) return;
+
+        setIsResetting(true);
+        try {
+            const collectionsToClear = [
+                'deposits',
+                'withdrawals',
+                'loanApplications',
+                'investments',
+                'chats'
+            ];
+
+            // 1. Clear simple collections
+            for (const collName of collectionsToClear) {
+                const snapshot = await getDocs(collection(db, collName));
+                const batchSize = 500;
+                
+                // Process in chunks due to batch limit
+                for (let i = 0; i < snapshot.docs.length; i += batchSize) {
+                    const batch = writeBatch(db);
+                    const chunk = snapshot.docs.slice(i, i + batchSize);
+                    
+                    for (const docSnap of chunk) {
+                        // For 'chats', also clear subcollection
+                        if (collName === 'chats') {
+                            const messagesSnap = await getDocs(collection(db, 'chats', docSnap.id, 'messages'));
+                            const msgBatch = writeBatch(db);
+                            messagesSnap.docs.forEach(m => msgBatch.delete(m.ref));
+                            await msgBatch.commit();
+                        }
+                        batch.delete(docSnap.ref);
+                    }
+                    await batch.commit();
+                }
+                console.log(`Cleared collection: ${collName}`);
+            }
+
+            // 2. Clear users (except current admin)
+            const usersSnap = await getDocs(collection(db, 'users'));
+            const userBatch = writeBatch(db);
+            let deletedUsers = 0;
+
+            for (const uDoc of usersSnap.docs) {
+                const userData = uDoc.data();
+                // Protect current admin and any user with role 'admin' or the master email
+                if (uDoc.id !== user?.uid && userData.role !== 'admin' && userData.email !== 'btechtools.ng@gmail.com') {
+                    userBatch.delete(uDoc.ref);
+                    deletedUsers++;
+                }
+            }
+            await userBatch.commit();
+            console.log(`Cleared ${deletedUsers} users.`);
+
+            alert("System reset successful. All user data wiped. Platform is now in a fresh state.");
+        } catch (err: any) {
+            console.error("Reset failed:", err);
+            handleFirestoreError(err, OperationType.WRITE, 'system/reset');
+            alert("Error during reset: " + err.message);
+        } finally {
+            setIsResetting(false);
+        }
+    };
+
+    return (
+        <div className="flex flex-col gap-10">
+            <div className="flex flex-col gap-2">
+                <h2 className="text-3xl font-black uppercase tracking-tight text-white italic">System Maintenance</h2>
+                <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Critical Operational Protocols</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="bg-red-500/5 border border-red-500/20 rounded-[32px] p-8 flex flex-col gap-6 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/10 blur-[80px] -z-10" />
+                    <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500 border border-red-500/20">
+                        <Trash2 className="w-8 h-8" />
+                    </div>
+                    
+                    <div className="flex flex-col gap-2">
+                        <h3 className="text-xl font-black uppercase tracking-tight">Full System Reset</h3>
+                        <p className="text-xs text-slate-400 leading-relaxed font-medium">
+                            This action will wipe all user data, including profiles, balances, deposits, withdrawals, loans, and chat history. 
+                            It serves as a "factory reset" for the platform.
+                        </p>
+                    </div>
+
+                    <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 flex flex-col gap-2">
+                        <span className="text-[9px] font-black uppercase text-red-400 tracking-widest">Wipe Scope:</span>
+                        <ul className="text-[10px] text-red-300/80 font-bold space-y-1">
+                            <li>• ALL User Accounts (Except Admins)</li>
+                            <li>• ALL Transaction Histories</li>
+                            <li>• ALL Loan Applications</li>
+                            <li>• ALL Live Chat Databases</li>
+                        </ul>
+                    </div>
+
+                    <button 
+                        onClick={handleSystemReset}
+                        disabled={isResetting}
+                        className={cn(
+                            "w-full py-5 rounded-[2rem] font-black uppercase tracking-widest text-xs transition-all active:scale-95 shadow-2xl",
+                            isResetting ? "bg-slate-800 text-slate-500 animate-pulse cursor-wait" : "bg-red-600 text-white hover:bg-red-500 shadow-red-900/40"
+                        )}
+                    >
+                        {isResetting ? 'Processing Wipe...' : 'Initiate Factory Reset'}
+                    </button>
+                    <p className="text-[9px] text-center text-slate-500 font-bold uppercase tracking-tighter">
+                        This action cannot be undone.
+                    </p>
+                </div>
+
+                <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-[32px] p-8 flex flex-col gap-6">
+                    <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/20">
+                        <Check className="w-8 h-8" />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        <h3 className="text-xl font-black uppercase tracking-tight">Preservation Policy</h3>
+                        <p className="text-xs text-slate-400 leading-relaxed font-medium">
+                            The following data nodes are automatically protected from system-wide wipe protocols to ensure continuity.
+                        </p>
+                    </div>
+                    <div className="flex flex-col gap-4 mt-2">
+                        <PreservedNode label="Admin Credentials" desc="Your access remains active" />
+                        <PreservedNode label="Investment Plans" desc="Configured tiers are safe" />
+                        <PreservedNode label="Site Settings" desc="GCash & Global config intact" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const PreservedNode = ({ label, desc }: { label: string, desc: string }) => (
+    <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5">
+        <div className="w-2 h-2 rounded-full bg-emerald-500" />
+        <div className="flex flex-col">
+            <span className="text-[10px] font-black uppercase text-white tracking-widest">{label}</span>
+            <span className="text-[9px] font-medium text-slate-500 uppercase">{desc}</span>
+        </div>
+    </div>
+);

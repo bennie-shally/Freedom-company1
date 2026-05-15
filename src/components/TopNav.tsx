@@ -9,13 +9,14 @@ import { useAuth } from '../contexts/AuthContext';
 import { auth } from '../lib/firebase';
 import { signOut } from 'firebase/auth';
 import { motion, AnimatePresence } from 'motion/react';
-import { Link, useNavigate } from 'react-router-dom';
-import { formatCurrency } from '../lib/utils';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { formatCurrency, cn } from '../lib/utils';
 
 export const TopNav: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { userData } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -63,24 +64,30 @@ export const TopNav: React.FC = () => {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="fixed right-0 top-0 bottom-0 w-[80%] max-w-sm bg-[#050505] border-l border-white/5 z-50 p-10 flex flex-col gap-10 shadow-[0_0_100px_rgba(37,99,235,0.1)]"
+              className="fixed right-0 top-0 bottom-0 w-[85%] max-w-sm bg-gradient-to-br from-[#081225] to-[#0f1f45] border-l border-blue-500/20 z-50 p-8 flex flex-col gap-8 shadow-[-20px_0_50px_rgba(0,0,0,0.5)] backdrop-blur-3xl"
             >
-              <div className="flex justify-between items-center text-white">
-                <span className="font-black text-xs uppercase tracking-[0.5em] text-slate-600">Main Menu</span>
+              <div className="flex justify-between items-center text-white mt-4 px-2">
+                <div className="flex flex-col">
+                  <span className="font-black text-[10px] uppercase tracking-[0.4em] text-blue-400">Navigation</span>
+                  <span className="font-black text-xs uppercase tracking-[0.2em] text-slate-500">Main Control</span>
+                </div>
                 <button 
                    onClick={() => setIsOpen(false)}
-                   className="p-2 bg-white/5 rounded-xl border border-white/5"
+                   className="p-3 bg-white/5 rounded-2xl border border-white/10 active:scale-90 transition-all text-white"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-6 w-6" />
                 </button>
               </div>
 
-              <div className="flex flex-col gap-2">
-                <MenuLink to="/dashboard" icon={<TrendingUp className="h-5 w-5" />} label="Dashboard" onClick={() => setIsOpen(false)} />
-                <MenuLink to="/deposit" icon={<Wallet className="h-5 w-5" />} label="Deposit" onClick={() => setIsOpen(false)} />
-                <MenuLink to="/withdraw" icon={<ReceiptText className="h-5 w-5" />} label="Withdraw" onClick={() => setIsOpen(false)} />
-                <MenuLink to="/profile" icon={<UserCircle className="h-5 w-5" />} label="Profile" onClick={() => setIsOpen(false)} />
-                <MenuLink to="/chat" icon={<MessageSquare className="h-5 w-5" />} label="Support" onClick={() => setIsOpen(false)} />
+              <div className="flex flex-col gap-1.5 mt-4">
+                <MenuLink to="/dashboard" active={location.pathname === '/dashboard'} icon={<TrendingUp className="h-5 w-5" />} label="Dashboard" onClick={() => setIsOpen(false)} />
+                <MenuLink to="/deposit" active={location.pathname === '/deposit'} icon={<Wallet className="h-5 w-5" />} label="Deposit" onClick={() => setIsOpen(false)} />
+                <MenuLink to="/withdraw" active={location.pathname === '/withdraw'} icon={<ReceiptText className="h-5 w-5" />} label="Withdraw" onClick={() => setIsOpen(false)} />
+                <MenuLink to="/plans" active={location.pathname === '/plans'} icon={<Zap className="h-5 w-5" />} label="Investment Plans" onClick={() => setIsOpen(false)} />
+                <MenuLink to="/loans" active={location.pathname === '/loans'} icon={<Banknote className="h-5 w-5" />} label="Loan Center" onClick={() => setIsOpen(false)} />
+                <MenuLink to="/history" active={location.pathname === '/history'} icon={<History className="h-5 w-5" />} label="Ledger History" onClick={() => setIsOpen(false)} />
+                <MenuLink to="/profile" active={location.pathname === '/profile'} icon={<UserCircle className="h-5 w-5" />} label="Secure ID" onClick={() => setIsOpen(false)} />
+                <MenuLink to="/chat" active={location.pathname === '/chat'} icon={<MessageSquare className="h-5 w-5" />} label="System Support" onClick={() => setIsOpen(false)} />
               </div>
 
               <div className="mt-auto">
@@ -100,14 +107,27 @@ export const TopNav: React.FC = () => {
   );
 };
 
-const MenuLink: React.FC<{ to: string; icon: React.ReactNode; label: string; onClick: () => void }> = ({ to, icon, label, onClick }) => (
+const MenuLink: React.FC<{ to: string; active?: boolean; icon: React.ReactNode; label: string; onClick: () => void }> = ({ to, active, icon, label, onClick }) => (
   <Link
     to={to}
     onClick={onClick}
-    className="flex items-center gap-5 p-5 text-slate-400 hover:text-white hover:bg-white/5 rounded-[1.5rem] transition-all border border-transparent hover:border-white/5"
+    className={cn(
+      "flex items-center gap-5 p-4 rounded-[1.5rem] transition-all border group",
+      active 
+        ? "bg-blue-600/10 border-blue-500/30 text-white shadow-[0_0_20px_rgba(37,99,235,0.1)]" 
+        : "bg-white/5 border-transparent text-slate-400 hover:text-white hover:bg-white/10 hover:border-white/10"
+    )}
   >
-    <div className="p-3 bg-white/5 rounded-xl text-blue-500">{icon}</div>
-    <span className="font-black text-xs uppercase tracking-widest">{label}</span>
+    <div className={cn(
+      "p-2.5 rounded-xl transition-all",
+      active ? "bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)]" : "bg-white/5 text-blue-500 group-hover:text-blue-400"
+    )}>
+      {icon}
+    </div>
+    <span className={cn(
+      "font-black text-[10px] uppercase tracking-[0.2em] transition-colors",
+      active ? "text-white" : "text-slate-400 group-hover:text-white"
+    )}>{label}</span>
   </Link>
 );
 
@@ -117,4 +137,16 @@ const TrendingUp = ({ className }: { className?: string }) => (
 
 const ReceiptText = ({ className }: { className?: string }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1Z"/><path d="M16 8h-6"/><path d="M16 12H8"/><path d="M13 16H8"/></svg>
+);
+
+const Zap = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+);
+
+const Banknote = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01"/><path d="M18 12h.01"/></svg>
+);
+
+const History = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
 );
