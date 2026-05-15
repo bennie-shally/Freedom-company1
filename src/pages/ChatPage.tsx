@@ -86,7 +86,7 @@ export const ChatPage: React.FC = () => {
               <p className="font-black text-[11px] uppercase tracking-widest text-white leading-none">Freedom Support</p>
               <div className="flex items-center gap-1.5 mt-1">
                 <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-[9px] text-green-500 font-black uppercase tracking-widest">Active Node</span>
+                <span className="text-[9px] text-green-500 font-black uppercase tracking-widest">Support Online</span>
               </div>
             </div>
           </div>
@@ -96,14 +96,14 @@ export const ChatPage: React.FC = () => {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {loading ? (
-          <div className="h-full flex items-center justify-center text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em]">Initialising Secure Link...</div>
+          <div className="h-full flex items-center justify-center text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em]">Connecting to Support...</div>
         ) : messages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center gap-8 opacity-40 px-10">
             <div className="w-20 h-20 rounded-[2.5rem] bg-white/5 flex items-center justify-center border border-white/10">
               <User className="w-10 h-10 text-gray-400" />
             </div>
             <div className="space-y-2">
-              <p className="text-xs text-white font-black uppercase tracking-[0.2em]">Channel Secured</p>
+              <p className="text-xs text-white font-black uppercase tracking-[0.2em]">Secure Chat</p>
               <p className="text-[10px] text-gray-500 leading-relaxed font-bold uppercase tracking-widest">Hello {userData?.username || 'User'}! How can we help you today?</p>
             </div>
           </div>
@@ -127,7 +127,7 @@ export const ChatPage: React.FC = () => {
               <span className="text-[8px] text-gray-600 font-black uppercase mt-2 tracking-[0.2em] px-1">
                 {msg.timestamp ? (
                    format(msg.timestamp.toDate?.() || new Date(msg.timestamp), 'HH:mm')
-                ) : 'Syncing...'}
+                ) : 'Sending...'}
               </span>
             </motion.div>
           ))
@@ -144,7 +144,7 @@ export const ChatPage: React.FC = () => {
           <input
             type="text"
             className="flex-1 bg-transparent px-4 py-2 outline-none text-sm placeholder:text-slate-700 text-white font-bold"
-            placeholder="TYPE_YOUR_MESSAGE"
+            placeholder="Type your message..."
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
           />

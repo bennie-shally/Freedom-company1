@@ -9,7 +9,7 @@ import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { formatCurrency, cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
-import { Wallet, TrendingUp, Users, ArrowUpRight, ArrowDownLeft, Clock, Zap, Banknote } from 'lucide-react';
+import { Wallet, TrendingUp, Users, ArrowUpRight, ArrowDownLeft, Clock, Zap, Banknote, ShieldCheck } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Investment } from '../types';
 import { handleFirestoreError, OperationType } from '../lib/errorHandlers';
@@ -76,15 +76,6 @@ export const Dashboard: React.FC = () => {
     const unsubscribe = onSnapshot(q, async (snapshot) => {
       const investments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Investment));
       setActiveInvestments(investments);
-
-      // Check for matured investments
-      const now = new Date();
-      for (const inv of investments) {
-        const endTime = inv.endsAt?.toDate?.() || new Date(inv.endsAt);
-        if (endTime <= now) {
-          await completeInvestment(inv);
-        }
-      }
     }, (err) => {
       handleFirestoreError(err, OperationType.LIST, 'investments');
     });
@@ -92,28 +83,11 @@ export const Dashboard: React.FC = () => {
     return () => unsubscribe();
   }, [user]);
 
-  useEffect(() => {
-    if (!activeInvestments.length) return;
-
-    // Periodic check for maturation while user is on page
-    const interval = setInterval(() => {
-      const now = new Date();
-      activeInvestments.forEach(inv => {
-        const endTime = inv.endsAt?.toDate?.() || new Date(inv.endsAt);
-        if (inv.status === 'running' && endTime <= now) {
-          completeInvestment(inv);
-        }
-      });
-    }, 10000); // Check every 10 seconds
-
-    return () => clearInterval(interval);
-  }, [activeInvestments]);
-
   if (authLoading || (user && !userData)) {
     return (
       <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center gap-6">
         <div className="w-16 h-16 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin shadow-2xl shadow-blue-500/10" />
-        <p className="text-[10px] font-black tracking-[0.5em] text-slate-500 uppercase">Synchronizing Node...</p>
+        <p className="text-[10px] font-black tracking-[0.5em] text-slate-500 uppercase">Loading Dashboard...</p>
       </div>
     );
   }
@@ -123,91 +97,63 @@ export const Dashboard: React.FC = () => {
     return null;
   }
 
-  const completeInvestment = async (inv: Investment) => {
-    if (inv.status !== 'running') return;
-    try {
-      const batch = writeBatch(db);
-      
-      // Update investment status
-      batch.update(doc(db, 'investments', inv.id), {
-        status: 'completed'
-      });
-
-      // Credit user balance and total earnings
-      batch.update(doc(db, 'users', inv.userId), {
-        balance: increment(isNaN(inv.totalReturn) ? 0 : inv.totalReturn),
-        totalEarnings: increment(isNaN(inv.profit) ? 0 : inv.profit)
-      });
-
-      await batch.commit();
-      console.log(`Investment ${inv.id} completed and credited.`);
-    } catch (err: any) {
-      console.error('Error completing investment:', err);
-      handleFirestoreError(err, OperationType.WRITE, 'investments/completion');
-    }
-  };
-
   return (
-    <div className="p-5 sm:p-6 flex flex-col gap-12 pb-24 sm:pb-12">
-      {/* User Hello */}
-      <div className="flex justify-between items-center px-2">
-        <div>
-          <p className="text-[10px] sm:text-xs text-slate-400 font-bold uppercase tracking-widest">Good morning,</p>
-          <h2 className="text-xl sm:text-2xl font-bold">{userData.username}</h2>
+    <div className="flex flex-col gap-8 pb-32 pt-4 px-5">
+      {/* User Header */}
+      <div className="flex justify-between items-center bg-white/5 p-4 rounded-[2rem] border border-white/5 backdrop-blur-md">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl flex items-center justify-center border border-white/20 shadow-[0_0_20px_rgba(59,130,246,0.3)]">
+            <span className="text-sm font-black text-white">{userData.username.substring(0, 2).toUpperCase()}</span>
+          </div>
+          <div className="flex flex-col">
+            <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] leading-tight mb-0.5">Account Overview</p>
+            <h2 className="text-lg font-black tracking-tighter uppercase italic">{userData.username}</h2>
+          </div>
         </div>
-        <div className="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center border border-white/10 shadow-lg">
-          <span className="text-sm font-black text-blue-400">{userData.username.substring(0, 2).toUpperCase()}</span>
+        <div className="flex items-center gap-2">
+          <div className="flex flex-col items-end">
+             <span className="text-[8px] font-black text-emerald-400 uppercase tracking-widest px-2 py-0.5 bg-emerald-400/10 rounded-full border border-emerald-400/20">VERIFIED</span>
+             <span className="text-[7px] font-bold text-slate-600 mt-1 uppercase tracking-tighter">SECURE SERVER</span>
+          </div>
         </div>
       </div>
 
-      {/* Balance Card (Frosted Glass) */}
+      {/* Balance Card (Enhanced Premium) */}
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="glass-panel rounded-[2.5rem] p-8 md:p-10 relative overflow-hidden group shadow-2xl border-white/10"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative group h-64 overflow-hidden rounded-[3rem]"
       >
-        <div className="absolute top-4 right-6 flex items-center gap-2 pointer-events-none opacity-40 grayscale group-hover:grayscale-0 transition-all">
-          <span className="text-[7px] font-black text-white/50 uppercase tracking-[0.2em]">Partner Node:</span>
-          <div className="flex gap-2">
-            <span className="text-[8px] font-black text-blue-400">GCash</span>
-            <span className="text-[8px] font-black text-emerald-400">Maya</span>
-          </div>
-        </div>
-        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 blur-[80px] -z-10 rounded-full select-none pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-500/10 blur-[80px] -z-10 rounded-full select-none pointer-events-none" />
-        
-        <div className="flex justify-between items-start mb-8 md:mb-10 pt-2">
-          <div className="flex flex-col gap-1">
-            <span className="text-[9px] sm:text-[10px] md:text-xs font-black tracking-[0.4em] text-slate-500 uppercase">Cryptographic Balance</span>
-            <span className="text-white/40 text-[7px] sm:text-[8px] md:text-[9px] font-bold uppercase tracking-widest leading-none">Secured via SHA-256 Node</span>
-          </div>
-          <div className="flex flex-col items-end gap-1">
-            <span className="bg-emerald-500/10 text-emerald-400 text-[9px] px-3 py-1 rounded-full border border-emerald-500/20 font-black tracking-widest shadow-xl shadow-emerald-900/10">ACTIVE</span>
-          </div>
-        </div>
-        
-        <div className="flex flex-col gap-2 mb-10 md:mb-12 min-w-0">
-          <h2 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tighter leading-tight whitespace-nowrap overflow-hidden text-ellipsis">
-            {formatCurrency(userData.balance)}
-          </h2>
-          <p className="text-[10px] text-slate-600 font-black uppercase tracking-[0.3em]">Institutional Liquidity Pool</p>
-        </div>
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-indigo-900 shadow-2xl" />
+        {/* Abstract Shapes */}
+        <div className="absolute -top-12 -right-12 w-48 h-48 bg-white/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-blue-400/20 rounded-full blur-3xl" />
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none" />
 
-        <div className="grid grid-cols-2 gap-4 md:gap-5">
-          <button 
-            onClick={() => navigate('/deposit')}
-            className="py-4 sm:py-5 bg-blue-600 hover:bg-blue-500 rounded-[1.5rem] text-xs font-black uppercase tracking-[0.2em] text-white shadow-2xl shadow-blue-900/50 transition-all active:scale-95 flex items-center justify-center gap-2"
-          >
-            <ArrowDownLeft className="w-4 h-4" />
-            Inject
-          </button>
-          <button 
-            onClick={() => navigate('/withdraw')}
-            className="py-4 sm:py-5 bg-white/5 hover:bg-white/10 rounded-[1.5rem] text-xs font-black uppercase tracking-[0.2em] text-white border border-white/10 transition-all active:scale-95 flex items-center justify-center gap-2 backdrop-blur-md"
-          >
-            <ArrowUpRight className="w-4 h-4" />
-            Extract
-          </button>
+        <div className="relative h-full flex flex-col justify-between p-8">
+          <div className="flex justify-between items-start">
+            <div className="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
+              <ShieldCheck className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex flex-col items-end gap-1">
+              <span className="text-[10px] font-black text-white/50 uppercase tracking-widest">Main Balance</span>
+              <div className="flex gap-2">
+                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">Total Balance</p>
+            <h2 className="text-4xl xs:text-5xl font-black text-white tracking-tighter">
+              {formatCurrency(userData.balance)}
+            </h2>
+          </div>
+
+          <div className="flex gap-3 mt-4">
+             <button onClick={() => navigate('/deposit')} className="flex-1 py-4 bg-white text-blue-900 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl active:scale-95 transition-all">DEPOSIT</button>
+             <button onClick={() => navigate('/withdraw')} className="flex-1 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl active:scale-95 transition-all">WITHDRAW</button>
+          </div>
         </div>
       </motion.div>
 
@@ -222,39 +168,57 @@ export const Dashboard: React.FC = () => {
                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Investment Opportunity</span>
              </div>
-             <h4 className="text-lg font-black text-white italic tracking-tighter uppercase leading-tight">Want to invest but lack the capital?</h4>
+             <h4 className="text-lg font-black text-white italic tracking-tighter uppercase leading-tight">No money to invest?</h4>
              <p className="text-[10px] text-slate-400 font-medium leading-relaxed max-w-[220px]">
-               Freedom Loans offers specialized credit for members ready to start their growth cycle today. Get funded instantly.
+               Freedom Loans provides the capital you need to start earning today. Apply now and grow your wealth.
              </p>
              <button 
                onClick={() => navigate('/loans')}
                className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-emerald-900/40"
              >
-               Apply for Funding
+               Apply for a Loan
              </button>
           </div>
         </div>
       </section>
 
       {/* Stats Mini Grid */}
-      <div className="grid grid-cols-2 gap-5">
-        <div className="glass-card p-6 rounded-[2rem] flex flex-col gap-2 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/5 blur-xl group-hover:bg-emerald-500/10 transition-all" />
-          <span className="text-[9px] uppercase font-black tracking-[0.3em] text-slate-500 relative z-10">Accumulated</span>
-          <span className="text-2xl font-black text-emerald-400 relative z-10">+{formatCurrency(userData.totalEarnings)}</span>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="bg-white/5 backdrop-blur-md p-6 rounded-[2.5rem] border border-white/5 flex flex-col gap-3 relative overflow-hidden group">
+          <div className="absolute -top-10 -right-10 w-24 h-24 bg-emerald-500/10 blur-2xl group-hover:bg-emerald-500/20 transition-all" />
+          <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+             <TrendingUp className="w-5 h-5" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[9px] uppercase font-black tracking-[0.3em] text-slate-500 mb-1">Total Earnings</span>
+            <span className="text-xl font-black text-emerald-400 tracking-tighter">+{formatCurrency(userData.totalEarnings)}</span>
+          </div>
         </div>
-        <div className="glass-card p-6 rounded-[2rem] flex flex-col gap-2 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-20 h-20 bg-blue-500/5 blur-xl group-hover:bg-blue-500/10 transition-all" />
-          <span className="text-[9px] uppercase font-black tracking-[0.3em] text-slate-500 relative z-10">Live Nodes</span>
-          <span className="text-2xl font-black text-blue-400 relative z-10">{activeInvestments.length}</span>
+        <div className="bg-white/5 backdrop-blur-md p-6 rounded-[2.5rem] border border-white/5 flex flex-col gap-3 relative overflow-hidden group">
+          <div className="absolute -top-10 -right-10 w-24 h-24 bg-blue-500/10 blur-2xl group-hover:bg-blue-500/20 transition-all" />
+          <div className="w-10 h-10 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400">
+             <Clock className="w-5 h-5" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[9px] uppercase font-black tracking-[0.3em] text-slate-500 mb-1">Active</span>
+            <span className="text-xl font-black text-blue-400 tracking-tighter">{activeInvestments.length} Investments</span>
+          </div>
         </div>
       </div>
 
-      {/* Active Growth Plan */}
+      {/* Menu Grid - Premium Mobile Navigation */}
+      <div className="grid grid-cols-4 gap-3">
+        <MenuIcon emoji="📈" label="Invest" onClick={() => navigate('/plans')} />
+        <MenuIcon emoji="🤝" label="Loans" onClick={() => navigate('/loans')} />
+        <MenuIcon emoji="👥" label="Refer" onClick={() => navigate('/referral')} />
+        <MenuIcon emoji="📜" label="History" onClick={() => navigate('/history')} />
+      </div>
+
+      {/* Active Investments */}
       <section className="flex flex-col gap-4">
         <div className="flex justify-between items-center">
-          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Active Growth Plan</h3>
-          <Link to="/plans" className="text-[10px] text-blue-400 font-black uppercase tracking-widest">New Cycle</Link>
+          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Active Investments</h3>
+          <Link to="/plans" className="text-[10px] text-blue-400 font-black uppercase tracking-widest">New Plan</Link>
         </div>
 
         {activeInvestments.length === 0 ? (
@@ -262,12 +226,12 @@ export const Dashboard: React.FC = () => {
             <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-slate-600">
               <TrendingUp className="w-6 h-6" />
             </div>
-            <p className="text-slate-500 text-xs font-medium">Ready to start your next cycle?</p>
+            <p className="text-slate-500 text-xs font-medium">You have no active investments.</p>
             <button 
               onClick={() => navigate('/plans')}
               className="mt-2 text-blue-400 text-[10px] font-black uppercase tracking-widest px-6 py-2.5 bg-blue-400/10 rounded-xl border border-blue-400/20"
             >
-              Start Cycle
+              Invest Now
             </button>
           </div>
         ) : (
@@ -279,13 +243,13 @@ export const Dashboard: React.FC = () => {
         )}
       </section>
 
-      {/* Quick Menu Grid */}
+      {/* Quick Access List */}
       <div className="grid grid-cols-5 gap-3 md:gap-4 mt-2">
-        <MenuIcon emoji="📈" label="Invest" onClick={() => navigate('/plans')} />
-        <MenuIcon emoji="🤝" label="Loans" onClick={() => navigate('/loans')} />
-        <MenuIcon emoji="👥" label="Affiliate" onClick={() => navigate('/referral')} />
-        <MenuIcon emoji="📜" label="Logs" onClick={() => navigate('/history')} />
-        <MenuIcon emoji="💬" label="Support" onClick={() => navigate('/chat')} />
+        <MenuIcon emoji="💳" label="Deposit" onClick={() => navigate('/deposit')} />
+        <MenuIcon emoji="💸" label="Withdraw" onClick={() => navigate('/withdraw')} />
+        <MenuIcon emoji="📊" label="History" onClick={() => navigate('/history')} />
+        <MenuIcon emoji="📱" label="Support" onClick={() => navigate('/chat')} />
+        <MenuIcon emoji="👤" label="Profile" onClick={() => navigate('/profile')} />
       </div>
 
       {/* Live Payouts (Social Proof) */}
@@ -318,11 +282,12 @@ export const Dashboard: React.FC = () => {
 };
 
 const MenuIcon = ({ emoji, label, onClick }: { emoji: string, label: string, onClick: () => void }) => (
-  <button onClick={onClick} className="flex flex-col items-center gap-2 group">
-    <div className="w-14 h-14 bg-slate-800 rounded-[20px] border border-white/5 flex items-center justify-center text-2xl group-active:scale-90 transition-all shadow-lg group-hover:border-blue-500/30">
-      {emoji}
+  <button onClick={onClick} className="flex flex-col items-center gap-2 group active:scale-90 transition-all">
+    <div className="w-full aspect-square bg-[#121212] rounded-3xl border border-white/5 flex items-center justify-center text-xl shadow-lg relative overflow-hidden group-hover:bg-white/5">
+      <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      <span className="relative z-10">{emoji}</span>
     </div>
-    <span className="text-[9px] text-slate-500 font-black uppercase tracking-tighter">{label}</span>
+    <span className="text-[8px] font-black uppercase tracking-tighter text-slate-500 group-hover:text-white transition-colors">{label}</span>
   </button>
 );
 

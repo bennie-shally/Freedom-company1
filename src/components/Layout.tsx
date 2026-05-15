@@ -8,6 +8,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { TopNav } from './TopNav';
 import { BottomNav } from './BottomNav';
 import { Footer } from './Footer';
+import { FloatingSupport } from './FloatingSupport';
 
 export const Layout: React.FC = () => {
   const location = useLocation();
@@ -28,6 +29,7 @@ export const Layout: React.FC = () => {
       </main>
 
       {!hideNav && !isAdminPage && <BottomNav />}
+      {!hideNav && !isAdminPage && <FloatingSupport />}
       {!hideNav && !isAdminPage && <Footer />}
     </div>
   );

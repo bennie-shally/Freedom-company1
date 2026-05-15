@@ -9,6 +9,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { useNavigate } from 'react-router-dom';
 import { User, Mail, Shield, LogOut, ChevronRight, Settings, Bell } from 'lucide-react';
+import { cn } from '../lib/utils';
 
 export const ProfilePage: React.FC = () => {
   const { userData } = useAuth();
@@ -18,7 +19,7 @@ export const ProfilePage: React.FC = () => {
     return (
       <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center gap-6">
         <div className="w-16 h-16 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin shadow-2xl shadow-blue-500/10" />
-        <p className="text-[10px] font-black tracking-[0.5em] text-slate-500 uppercase">Synchronizing Node...</p>
+        <p className="text-[10px] font-black tracking-[0.5em] text-slate-500 uppercase">Loading Profile...</p>
       </div>
     );
   }
@@ -29,63 +30,67 @@ export const ProfilePage: React.FC = () => {
   };
 
   return (
-    <div className="p-8 flex flex-col gap-10 pb-24 text-slate-100">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-black tracking-tight">Security Vault</h1>
-        <p className="text-slate-500 text-sm font-medium">Verified Identity & Encryption Settings</p>
+    <div className="flex flex-col gap-10 pb-32 pt-4 px-6 text-slate-100">
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-2">
+           <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+           <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Verified Account</span>
+        </div>
+        <h1 className="text-4xl font-black tracking-tighter uppercase italic tracking-widest">User <span className="text-blue-500">Profile</span></h1>
       </div>
 
-      <div className="flex flex-col items-center gap-6 py-4">
-        <div className="w-28 h-28 rounded-[40px] glass-panel flex items-center justify-center text-blue-400 text-5xl font-black shadow-2xl relative">
-          <div className="absolute inset-0 bg-blue-500/10 blur-xl rounded-full -z-10" />
-          {userData.username[0].toUpperCase()}
-        </div>
-        <div className="text-center">
-          <h2 className="text-2xl font-black">{userData.username}</h2>
-          <div className="flex items-center justify-center gap-2 mt-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">{userData.email}</p>
+      <div className="flex flex-col items-center gap-8 py-6">
+        <div className="relative">
+          <div className="w-32 h-32 rounded-[2.5rem] bg-gradient-to-br from-blue-500 to-indigo-700 flex items-center justify-center text-white text-5xl font-black shadow-[0_0_50px_rgba(59,130,246,0.3)] border-4 border-white/10">
+            {userData.username[0].toUpperCase()}
+          </div>
+          <div className="absolute -bottom-2 -right-2 bg-emerald-500 p-2 rounded-2xl border-4 border-[#0F172A] shadow-xl">
+             <Shield className="w-5 h-5 text-white" />
           </div>
         </div>
+        <div className="text-center space-y-2">
+          <h2 className="text-3xl font-black tracking-tighter uppercase">{userData.username}</h2>
+          <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.3em]">{userData.email}</p>
+        </div>
       </div>
 
-      <section className="flex flex-col gap-4">
-        <ProfileItem icon={<User className="w-5 h-5" />} label="Account Profile" sub="Status: Premium Active" />
-        <ProfileItem icon={<Settings className="w-5 h-5" />} label="Security Node" sub="2FA & Passkey" />
-        <ProfileItem icon={<Bell className="w-5 h-5" />} label="Alert Hub" sub="Real-time Webhooks" />
-        <ProfileItem icon={<Shield className="w-5 h-5" />} label="Legal Ledger" sub="Terms of Service" />
-      </section>
+      <div className="grid gap-3">
+        <ProfileItem icon={<Settings className="w-5 h-5" />} label="Account Settings" sub="Update your defaults" />
+        <ProfileItem icon={<Bell className="w-5 h-5" />} label="Notifications" sub="Manage alerts" />
+        <ProfileItem icon={<LogOut className="w-5 h-5" />} label="Logout" sub="Exit your account" onClick={handleLogout} isDanger />
+      </div>
 
-      <button
-        onClick={handleLogout}
-        className="mt-4 flex items-center justify-center gap-4 w-full py-5 bg-red-500/10 text-red-500 rounded-[2rem] font-black uppercase tracking-[0.2em] text-[10px] border border-red-500/20 active:scale-95 transition-all shadow-lg"
-      >
-        <LogOut className="w-5 h-5" />
-        Terminate Session
-      </button>
-
-      <div className="bg-slate-900/40 p-8 rounded-[2rem] border border-white/5 text-center">
-        <p className="text-[9px] text-slate-600 uppercase font-black tracking-[0.3em] leading-relaxed">
-          System Core: 2.4.0 (Node.js)<br/>
-          Licensed to Freedom Infrastructures<br/>
-          Encrypted Tunnel: Multi-Path Active
+      <div className="p-8 rounded-[2.5rem] bg-white/5 border border-white/5 text-center mt-4">
+        <p className="text-[8px] text-slate-600 uppercase font-black tracking-[0.4em] leading-relaxed">
+          Freedom Company<br/>
+          All Rights Reserved © 2026<br/>
+          ID: {userData.username.substring(0, 4)}-{Math.floor(Math.random() * 9000) + 1000}
         </p>
       </div>
     </div>
   );
 };
 
-const ProfileItem = ({ icon, label, sub }: { icon: React.ReactNode, label: string, sub: string }) => (
-  <button className="flex items-center justify-between p-6 glass-card border-white/5 rounded-[2rem] hover:bg-white/5 transition-all group active:scale-[0.98]">
+const ProfileItem = ({ icon, label, sub, onClick, isDanger }: { icon: React.ReactNode, label: string, sub: string, onClick?: () => void, isDanger?: boolean }) => (
+  <button 
+    onClick={onClick}
+    className={cn(
+      "flex items-center justify-between p-6 bg-white/5 border border-white/5 rounded-[2rem] transition-all group active:scale-[0.98]",
+      isDanger ? "hover:bg-red-500/10 hover:border-red-500/20" : "hover:bg-white/10 hover:border-white/10"
+    )}
+  >
     <div className="flex items-center gap-5">
-      <div className="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center text-slate-500 group-hover:text-blue-400 group-hover:bg-blue-600/10 transition-all">
+      <div className={cn(
+        "w-12 h-12 rounded-2xl flex items-center justify-center transition-all",
+        isDanger ? "bg-red-500/10 text-red-500" : "bg-[#121212] text-slate-500 group-hover:text-blue-400 group-hover:bg-blue-600/10"
+      )}>
         {icon}
       </div>
       <div className="flex flex-col text-left">
-        <span className="text-sm font-black text-slate-200">{label}</span>
+        <span className={cn("text-xs font-black uppercase tracking-widest", isDanger ? "text-red-500" : "text-slate-200")}>{label}</span>
         <span className="text-[9px] text-slate-500 uppercase font-black tracking-widest mt-1">{sub}</span>
       </div>
     </div>
-    <ChevronRight className="w-5 h-5 text-slate-700 group-hover:text-blue-500 transition-colors" />
+    <ChevronRight className={cn("w-5 h-5", isDanger ? "text-red-500/30" : "text-slate-700 group-hover:text-blue-500")} />
   </button>
 );

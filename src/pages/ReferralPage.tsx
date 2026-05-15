@@ -41,69 +41,79 @@ export const ReferralPage: React.FC = () => {
   if (!userData) return null;
 
   return (
-    <div className="p-6 flex flex-col gap-8 pb-24 text-white">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight">Refer & Earn</h1>
-        <p className="text-gray-500 text-sm">Spread the word and earn {formatCurrency(bonus)} for every active referral.</p>
+    <div className="flex flex-col gap-10 pb-32 pt-4 px-6 text-white">
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-2">
+           <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+           <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Refer & Earn</span>
+        </div>
+        <h1 className="text-4xl font-black tracking-tighter uppercase italic tracking-widest">Invite <span className="text-blue-500">Friends</span></h1>
+        <p className="text-slate-500 text-[10px] font-bold uppercase tracking-[0.1em] leading-relaxed">
+          Invite people to join Freedom Company and get a bonus for every successful referral.
+        </p>
       </div>
 
-      {/* Bonus Card */}
-      <div className="bg-gradient-to-br from-purple-600/20 to-brand-primary/10 border border-white/5 rounded-[32px] p-8 relative overflow-hidden">
-        <div className="absolute -top-10 -right-10 opacity-10">
-          <Gift className="w-40 h-40" />
+      {/* Bonus Card (Premium) */}
+      <div className="relative group overflow-hidden rounded-[3rem] bg-gradient-to-br from-blue-600 to-blue-900 p-8 shadow-2xl">
+        <div className="absolute -top-10 -right-10 opacity-20 group-hover:scale-110 transition-transform">
+          <Users className="w-48 h-48 text-white" />
         </div>
-        
-        <div className="flex flex-col gap-1 mb-8 relative z-10">
-          <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-purple-300">Total Referrals</span>
-          <h2 className="text-4xl font-mono font-bold text-white tracking-tight">{referrals.length}</h2>
-        </div>
-
-        <div className="flex items-center gap-2 relative z-10">
-          <TrendingUp className="w-4 h-4 text-green-400" />
-          <span className="text-xs font-bold text-green-400 uppercase tracking-wider">Passive Income Growing</span>
-        </div>
-      </div>
-
-      {/* Referral Link */}
-      <div className="flex flex-col gap-4">
-        <h3 className="font-bold text-sm uppercase tracking-wider text-gray-400 ml-1">Your Referral Link</h3>
-        <div className="flex items-center gap-2 bg-brand-muted/50 border border-white/5 p-4 rounded-2xl">
-          <p className="text-xs text-brand-primary font-mono truncate flex-1">{referralLink}</p>
-          <button onClick={handleCopy} className="p-2 bg-brand-primary text-black rounded-xl active:scale-95 transition-all">
-            <Copy className="w-4 h-4" />
-          </button>
+        <div className="relative z-10 flex flex-col gap-8">
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] uppercase font-black tracking-[0.4em] text-white/50">Active Referrals</span>
+            <h2 className="text-5xl font-black text-white italic tracking-tighter">{referrals.length}</h2>
+          </div>
+          <div className="flex items-center gap-3 px-4 py-2 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 self-start">
+             <Gift className="w-4 h-4 text-white" />
+             <span className="text-[10px] font-black uppercase tracking-widest text-white">Bonus: {formatCurrency(bonus)} / referral</span>
+          </div>
         </div>
       </div>
 
-      {/* Referral Code */}
-      <div className="flex flex-col gap-4">
-        <h3 className="font-bold text-sm uppercase tracking-wider text-gray-400 ml-1">Referral Code</h3>
-        <div className="flex items-center justify-between bg-brand-muted/50 border border-white/5 p-6 rounded-[32px]">
-          <span className="text-4xl font-mono font-black tracking-widest text-white uppercase">{userData.referralCode}</span>
-          <button onClick={() => handleCopy()} className="px-6 py-3 bg-white/5 hover:bg-white/10 rounded-2xl font-bold text-sm transition-all">
-            Copy
-          </button>
+      {/* Referral Controls */}
+      <div className="flex flex-col gap-6">
+        <div className="space-y-4">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 ml-2">Referral Code</h3>
+          <div className="flex items-center justify-between bg-white/5 border border-white/5 p-8 rounded-[2.5rem] shadow-inner backdrop-blur-md">
+            <span className="text-4xl font-black tracking-[0.2em] text-white uppercase italic">{userData.referralCode}</span>
+            <button onClick={handleCopy} className="p-4 bg-white text-blue-900 rounded-2xl active:scale-95 transition-all shadow-xl">
+              <Copy className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 ml-2">Referral Link</h3>
+          <div className="flex items-center gap-3 bg-white/5 border border-white/5 p-5 rounded-3xl backdrop-blur-md">
+            <p className="text-[9px] text-blue-400 font-black truncate flex-1 uppercase tracking-widest">{referralLink}</p>
+            <button onClick={handleCopy} className="p-2.5 bg-blue-500/10 text-blue-400 rounded-xl active:scale-95 transition-all">
+              <Share2 className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
 
       {/* My Referrals List */}
       <section className="flex flex-col gap-4">
-        <h3 className="font-bold text-sm uppercase tracking-wider text-gray-400 ml-1">My Network</h3>
+        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 ml-2">Your Referrals</h3>
         {referrals.length === 0 ? (
-          <div className="bg-white/5 border border-dashed border-white/10 rounded-3xl p-10 text-center text-gray-500 text-xs font-medium uppercase tracking-widest leading-loose">
-            No referrals yet.<br/>Start sharing your link!
+          <div className="bg-white/5 border border-dashed border-white/10 rounded-[2.5rem] p-12 text-center text-slate-600 text-[10px] font-black uppercase tracking-[0.2em] leading-loose">
+            No referrals yet.<br/>Share your link to start earning.
           </div>
         ) : (
-          <div className="flex flex-col gap-3">
+          <div className="grid gap-3">
             {referrals.map((ref, idx) => (
-              <div key={idx} className="bg-brand-muted/50 border border-white/5 p-4 rounded-2xl flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-xs font-bold text-brand-primary">
+              <div key={idx} className="bg-white/5 border border-white/5 p-5 rounded-3xl flex items-center justify-between backdrop-blur-sm">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-2xl bg-blue-500/10 flex items-center justify-center text-xs font-black text-blue-400">
                     {ref.username[0].toUpperCase()}
                   </div>
-                  <span className="text-sm font-medium">{ref.username}</span>
+                  <div className="flex flex-col">
+                    <span className="text-xs font-black text-slate-200 uppercase tracking-tight">{ref.username}</span>
+                    <span className="text-[8px] text-slate-600 font-black uppercase tracking-widest">Active Member</span>
+                  </div>
                 </div>
-                <span className="text-[10px] text-gray-500 font-bold uppercase">Active User</span>
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               </div>
             ))}
           </div>

@@ -104,78 +104,88 @@ export const DepositPage: React.FC = () => {
   }
 
   return (
-    <div className="p-6 flex flex-col gap-8 pb-24">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-black tracking-tight text-white">Inject Funds</h1>
-        <p className="text-slate-500 text-sm font-medium">Power up your account using GCash Direct.</p>
+    <div className="flex flex-col gap-10 pb-32 pt-4 px-6 text-white overflow-hidden">
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-2">
+           <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+           <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Fund Your Account</span>
+        </div>
+        <h1 className="text-4xl font-black tracking-tighter uppercase italic tracking-widest">Deposit <span className="text-blue-500">Money</span></h1>
+        <p className="text-slate-500 text-[10px] font-bold uppercase tracking-[0.1em] leading-relaxed">
+          Send your payment via GCash. Your account will be updated within 15 minutes.
+        </p>
       </div>
 
-      {/* Step 1: Payment Details */}
-      <section className="flex flex-col gap-4">
-        <div className="flex items-center gap-3 px-1">
-          <div className="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center text-[10px] font-black shadow-lg shadow-blue-900/20">01</div>
-          <h3 className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-500">Destination Account</h3>
+      {/* Step 1: Destination */}
+      <section className="flex flex-col gap-6">
+        <div className="flex items-center gap-3">
+           <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">01 / Payment Details</span>
+           <div className="h-px flex-1 bg-white/5" />
         </div>
         
-        <div className="glass-panel border-white/10 rounded-[2rem] p-8 flex flex-col gap-8">
-          <div className="flex items-center justify-between">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/GCash_logo.svg/1024px-GCash_logo.svg.png" alt="GCash" className="h-5 opacity-80" />
-            <div className="px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-[9px] font-black uppercase tracking-widest border border-emerald-500/20">Instant Node</div>
+        <div className="bg-[#121212] border border-white/5 rounded-[2.5rem] p-8 space-y-8 backdrop-blur-xl">
+          <div className="flex justify-between items-center">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/GCash_logo.svg/1024px-GCash_logo.svg.png" alt="GCash" className="h-4 brightness-0 invert opacity-70" />
+            <span className="px-3 py-1 bg-blue-500/10 text-blue-400 rounded-lg text-[8px] font-black uppercase tracking-widest border border-blue-500/20">Active GCash</span>
           </div>
 
-          <div className="space-y-6">
-            <div className="flex items-center justify-between p-5 bg-white/5 rounded-2xl border border-white/5 group hover:border-blue-500/20 transition-all">
-              <div className="flex flex-col gap-1">
-                <span className="text-[9px] text-slate-500 uppercase font-black tracking-widest leading-none">Wallet Address</span>
-                <span className="font-mono text-xl font-black text-white">{settings?.gcashNumber}</span>
+          <div className="grid gap-4">
+            <div className="bg-white/5 p-5 rounded-2xl border border-white/5 flex items-center justify-between group active:scale-95 transition-all">
+              <div className="space-y-1">
+                <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Wallet Number</p>
+                <p className="text-lg font-black text-white italic tracking-tighter">{settings?.gcashNumber}</p>
               </div>
-              <button onClick={() => handleCopy(settings?.gcashNumber || '')} className="p-3 bg-blue-600/10 text-blue-400 rounded-xl hover:bg-blue-600 hover:text-white transition-all"><Copy className="w-5 h-5" /></button>
+              <button onClick={() => handleCopy(settings?.gcashNumber || '')} className="p-3 bg-white/5 text-blue-400 rounded-xl hover:bg-white/10 transition-colors">
+                <Copy className="w-5 h-5" />
+              </button>
             </div>
             
-            <div className="flex items-center justify-between p-5 bg-white/5 rounded-2xl border border-white/5 group hover:border-blue-500/20 transition-all">
-              <div className="flex flex-col gap-1">
-                <span className="text-[9px] text-slate-500 uppercase font-black tracking-widest leading-none">Receiver Hub</span>
-                <span className="font-black text-white text-lg">{settings?.gcashName}</span>
+            <div className="bg-white/5 p-5 rounded-2xl border border-white/5 flex items-center justify-between group active:scale-95 transition-all">
+              <div className="space-y-1">
+                <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Account Holder</p>
+                <p className="text-lg font-black text-white italic tracking-tighter">{settings?.gcashName}</p>
               </div>
-              <button onClick={() => handleCopy(settings?.gcashName || '')} className="p-3 bg-blue-600/10 text-blue-400 rounded-xl hover:bg-blue-600 hover:text-white transition-all"><Copy className="w-5 h-5" /></button>
+              <button onClick={() => handleCopy(settings?.gcashName || '')} className="p-3 bg-white/5 text-blue-400 rounded-xl hover:bg-white/10 transition-colors">
+                <Copy className="w-5 h-5" />
+              </button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Step 2: Upload Proof */}
-      <section className="flex flex-col gap-4">
-        <div className="flex items-center gap-3 px-1">
-          <div className="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center text-[10px] font-black shadow-lg shadow-blue-900/20">02</div>
-          <h3 className="font-black text-[10px] uppercase tracking-[0.2em] text-slate-500">Validation Protocol</h3>
+      {/* Step 2: Verification */}
+      <section className="flex flex-col gap-6">
+        <div className="flex items-center gap-3">
+           <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">02 / Proof of Payment</span>
+           <div className="h-px flex-1 bg-white/5" />
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-8">
-          <div className="flex flex-col gap-3">
-            <label className="text-[9px] font-black uppercase text-slate-500 tracking-[0.2em] ml-1">Transfer Amount (PHP)</label>
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="space-y-3">
+            <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest ml-2 italic">Transfer Amount (PHP)</label>
             <input
               type="number"
               required
               min="500"
               placeholder="0.00"
-              className="w-full glass-card border-white/10 rounded-[1.5rem] p-5 text-white text-2xl font-black placeholder:text-slate-700 outline-none focus:border-blue-500/30 transition-all"
+              className="w-full bg-white/5 border border-white/5 rounded-[1.5rem] p-6 text-white text-3xl font-black italic tracking-tighter placeholder:text-slate-800 outline-none focus:bg-white/10 transition-all shadow-inner"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
             />
           </div>
 
-          <div className="flex flex-col gap-3">
-            <label className="text-[9px] font-black uppercase text-slate-500 tracking-[0.2em] ml-1">Transaction Receipt</label>
-            <label className="relative h-60 glass-card border-2 border-dashed border-white/10 rounded-[2rem] flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-blue-500/30 transition-all group">
+          <div className="space-y-3">
+            <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest ml-2 italic">Upload Receipt</label>
+            <label className="relative h-64 bg-white/5 border-2 border-dashed border-white/10 rounded-[2.5rem] flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:bg-white/10 transition-all group">
               {preview ? (
                 <img src={preview} alt="Receipt preview" className="w-full h-full object-cover" />
               ) : (
-                <>
-                  <div className="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-16 h-16 rounded-[2rem] bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform shadow-[0_0_30px_rgba(59,130,246,0.1)]">
                     <Upload className="w-8 h-8" />
                   </div>
-                  <span className="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em] mt-4">Drop digital receipt here</span>
-                </>
+                  <span className="text-[9px] text-slate-500 font-black uppercase tracking-[0.2em]">Select Receipt Image</span>
+                </div>
               )}
               <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} required />
             </label>
@@ -183,9 +193,9 @@ export const DepositPage: React.FC = () => {
 
           <button
             disabled={loading || !amount || !file}
-            className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-[2rem] shadow-2xl shadow-blue-900/40 active:scale-[0.98] transition-all disabled:opacity-50 text-[11px] uppercase tracking-[0.3em]"
+            className="w-full py-5 bg-white text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-[1.5rem] shadow-[0_0_50px_rgba(255,255,255,0.1)] active:scale-95 transition-all disabled:opacity-50"
           >
-            {loading ? 'Initializing...' : 'Confirm Injection'}
+            {loading ? 'Processing...' : 'Confirm Deposit'}
           </button>
         </form>
       </section>
@@ -194,9 +204,9 @@ export const DepositPage: React.FC = () => {
       <div className="flex items-center justify-between p-6 bg-slate-900/40 rounded-[2rem] border border-white/5">
         <div className="flex items-center gap-4">
           <AlertCircle className="w-5 h-5 text-slate-500" />
-          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Sync Issues?</span>
+          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Need Help?</span>
         </div>
-        <a href={settings?.whatsappAdmin} className="text-[10px] text-blue-400 font-black uppercase tracking-[0.2em] px-4 py-2 bg-blue-400/10 rounded-full border border-blue-400/20">Support Node</a>
+        <a href={settings?.whatsappAdmin} className="text-[10px] text-blue-400 font-black uppercase tracking-[0.2em] px-4 py-2 bg-blue-400/10 rounded-full border border-blue-400/20">Contact Support</a>
       </div>
     </div>
   );

@@ -47,38 +47,42 @@ export const LandingPage: React.FC = () => {
         title="Admin Entry"
       />
       {/* Hero Section */}
-      <section className="px-6 md:px-8 pt-10 md:pt-16 text-center relative max-w-lg mx-auto">
+      <section className="px-6 md:px-8 pt-10 md:pt-16 text-center relative flex flex-col justify-center min-h-[70vh]">
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="flex flex-col items-center gap-6 md:gap-8"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col items-center gap-6 md:gap-10"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] shadow-lg">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            Vercel Powered Nodes
+          <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-white/5 border border-white/10 text-white/60 text-[9px] font-black uppercase tracking-[0.3em] shadow-xl backdrop-blur-md">
+            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+            Verified Investment Network
           </div>
-          <h1 className="text-4xl md:text-6xl font-black tracking-tighter leading-[0.9] text-white">
-            Freedom <span className="text-blue-400">Company</span> Ecosystem
-          </h1>
-          <p className="text-slate-400 max-w-[280px] md:max-w-sm mx-auto text-xs md:text-sm leading-relaxed font-medium">
-            The Philippines' most trusted investment platform. Experience seamless cycles with GCash integration.
-          </p>
-          <div className="flex flex-col w-full gap-3 md:gap-4 mt-2">
+          
+          <div className="space-y-4">
+            <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-[0.85] text-white italic uppercase bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
+              Freedom <br/> <span className="text-blue-500">Company</span>
+            </h1>
+            <p className="text-slate-500 max-w-[280px] md:max-w-md mx-auto text-[11px] md:text-sm leading-relaxed font-bold uppercase tracking-widest opacity-80">
+              Freedom Company - Premium Investment Platform. Secure your financial freedom with real-time earnings and reliable growth.
+            </p>
+          </div>
+
+          <div className="flex flex-col w-full max-w-sm gap-4 mt-4">
             <Link 
               to={user ? "/dashboard" : "/register"}
-              className="py-5 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-3xl flex items-center justify-center gap-3 shadow-2xl shadow-blue-900/40 active:scale-95 transition-all text-sm uppercase tracking-widest"
+              className="group relative py-6 bg-white text-black font-black rounded-[2rem] flex items-center justify-center gap-3 shadow-[0_0_40px_rgba(255,255,255,0.1)] active:scale-95 transition-all overflow-hidden"
             >
-              Start Earning Now
-              <ChevronRight className="w-5 h-5" />
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-white group-hover:opacity-90 transition-opacity" />
+              <span className="relative z-10 text-xs uppercase tracking-[0.2em]">Get Started Now</span>
+              <ChevronRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <div className="mt-4 flex flex-col items-center justify-center gap-2 text-center">
-              <div className="flex items-center gap-2 text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em] opacity-80">
-                <Banknote className="w-4 h-4" />
-                <span>Zero Capital? No Problem.</span>
+            
+            <div className="mt-2 flex flex-col items-center gap-4">
+              <div className="w-px h-12 bg-gradient-to-b from-blue-500 to-transparent" />
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.3em]">Easy Investments</span>
+                <p className="text-[9px] text-slate-600 font-bold uppercase tracking-widest max-w-[200px]">Start even with zero capital via our Loan system</p>
               </div>
-              <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest leading-relaxed max-w-[280px]">
-                We now offer instant loans specifically for members who want to start their investment journey but lack immediate capital.
-              </p>
             </div>
           </div>
         </motion.div>
@@ -88,10 +92,10 @@ export const LandingPage: React.FC = () => {
       <section className="px-6">
         <div className="glass-panel border-white/10 rounded-[2.5rem] p-8">
           <div className="flex items-center justify-between mb-8">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Live Payout Engine</h3>
+            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Live Payouts</h3>
             <div className="flex items-center gap-2 px-2.5 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[9px] text-emerald-500 font-black uppercase tracking-tighter">Synchronized</span>
+              <span className="text-[9px] text-emerald-500 font-black uppercase tracking-tighter">Live</span>
             </div>
           </div>
           
@@ -122,16 +126,16 @@ export const LandingPage: React.FC = () => {
             </AnimatePresence>
           </div>
           
-          <p className="mt-8 text-center text-[9px] text-slate-600 font-black uppercase tracking-[0.2em]">High Volume Traffic: 1.2k req/sec</p>
+          <p className="mt-8 text-center text-[9px] text-slate-600 font-black uppercase tracking-[0.2em]">100% Secure & Reliable Platform</p>
         </div>
       </section>
 
       {/* Stats */}
       <section className="px-6 grid grid-cols-2 gap-4">
-        <StatCard label="Circulating" value="₱24.5M+" />
+        <StatCard label="Total Payouts" value="₱24.5M+" />
         <StatCard label="Success Rate" value="100%" />
-        <StatCard label="Verified" value="12k+" />
-        <StatCard label="Cycles" value="8" />
+        <StatCard label="Active Users" value="12k+" />
+        <StatCard label="Reliability" value="High" />
       </section>
     </div>
   );

@@ -24,24 +24,27 @@ export const TopNav: React.FC = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 h-16 sm:h-20 bg-slate-900/80 border-b border-white/5 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between">
-      <Link to="/" className="flex items-center gap-1.5 sm:gap-2">
-        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-blue-600 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/20 text-sm sm:text-base">F</div>
-        <span className="font-bold tracking-tight text-white text-base sm:text-lg">FREEDOM</span>
+    <header className="fixed top-0 left-0 right-0 z-50 h-20 bg-black/80 border-b border-white/5 backdrop-blur-xl px-6 flex items-center justify-between">
+      <Link to="/dashboard" className="flex items-center gap-3 active:scale-95 transition-transform">
+        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center font-black text-white shadow-[0_0_20px_rgba(37,99,235,0.3)] text-lg border border-white/10">F</div>
+        <div className="flex flex-col -gap-1">
+           <span className="font-black tracking-[-0.05em] text-white text-lg leading-none uppercase italic">FREEDOM</span>
+           <span className="text-[7px] font-black tracking-[0.4em] text-blue-500 uppercase leading-none">Company</span>
+        </div>
       </Link>
 
-      <div className="flex items-center gap-2 sm:gap-4">
+      <div className="flex items-center gap-4">
         {userData && (
-          <div className="flex flex-col items-end mr-1 sm:mr-2">
-            <span className="text-[8px] sm:text-[10px] text-slate-400 uppercase font-black tracking-wider leading-none">Available</span>
-            <span className="text-sm sm:text-base font-black text-blue-400 leading-tight">{formatCurrency(userData.balance)}</span>
+          <div className="flex flex-col items-end">
+            <span className="text-[7px] text-slate-500 uppercase font-black tracking-[0.3em] leading-none mb-1">Available Balance</span>
+            <span className="text-sm font-black text-white italic tracking-tighter leading-none">{formatCurrency(userData.balance)}</span>
           </div>
         )}
         <button 
           onClick={() => setIsOpen(!isOpen)}
-          className="p-2 sm:p-2.5 bg-slate-800 rounded-lg sm:rounded-xl border border-white/5 text-slate-400 hover:text-white transition-all active:scale-95"
+          className="p-3 bg-white/5 rounded-2xl border border-white/5 text-slate-400 active:scale-90 transition-all shadow-inner"
         >
-          {isOpen ? <X className="h-5 w-5 sm:h-6 sm:w-6" /> : <Menu className="h-5 w-5 sm:h-6 sm:w-6" />}
+          {isOpen ? <X className="h-6 w-6 text-white" /> : <Menu className="h-6 w-6 text-white" />}
         </button>
       </div>
 
@@ -53,31 +56,37 @@ export const TopNav: React.FC = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
-              className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40"
+              className="fixed inset-0 bg-black/80 backdrop-blur-md z-40"
             />
             <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed right-0 top-0 bottom-0 w-72 bg-slate-900 border-l border-white/5 z-50 p-8 flex flex-col gap-6 shadow-2xl"
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="fixed right-0 top-0 bottom-0 w-[80%] max-w-sm bg-[#050505] border-l border-white/5 z-50 p-10 flex flex-col gap-10 shadow-[0_0_100px_rgba(37,99,235,0.1)]"
             >
-              <div className="flex justify-between items-center mb-4">
-                <span className="font-bold text-lg">Menu</span>
-                <button onClick={() => setIsOpen(false)}><X className="h-6 w-6" /></button>
+              <div className="flex justify-between items-center text-white">
+                <span className="font-black text-xs uppercase tracking-[0.5em] text-slate-600">Main Menu</span>
+                <button 
+                   onClick={() => setIsOpen(false)}
+                   className="p-2 bg-white/5 rounded-xl border border-white/5"
+                >
+                  <X className="h-5 w-5" />
+                </button>
               </div>
 
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <MenuLink to="/dashboard" icon={<TrendingUp className="h-5 w-5" />} label="Dashboard" onClick={() => setIsOpen(false)} />
                 <MenuLink to="/deposit" icon={<Wallet className="h-5 w-5" />} label="Deposit" onClick={() => setIsOpen(false)} />
                 <MenuLink to="/withdraw" icon={<ReceiptText className="h-5 w-5" />} label="Withdraw" onClick={() => setIsOpen(false)} />
                 <MenuLink to="/profile" icon={<UserCircle className="h-5 w-5" />} label="Profile" onClick={() => setIsOpen(false)} />
-                <MenuLink to="/chat" icon={<MessageSquare className="h-5 w-5" />} label="Support Chat" onClick={() => setIsOpen(false)} />
+                <MenuLink to="/chat" icon={<MessageSquare className="h-5 w-5" />} label="Support" onClick={() => setIsOpen(false)} />
               </div>
 
               <div className="mt-auto">
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-3 text-red-400 font-medium w-full p-3 hover:bg-red-400/10 rounded-xl transition-colors"
+                  className="flex items-center gap-4 text-red-500 font-black uppercase tracking-widest text-[10px] w-full p-6 bg-red-500/5 hover:bg-red-500/10 border border-red-500/10 rounded-[2rem] transition-all"
                 >
                   <LogOut className="h-5 w-5" />
                   Logout
@@ -95,11 +104,15 @@ const MenuLink: React.FC<{ to: string; icon: React.ReactNode; label: string; onC
   <Link
     to={to}
     onClick={onClick}
-    className="flex items-center gap-3 p-3 text-gray-200 hover:text-white hover:bg-white/5 rounded-xl transition-all"
+    className="flex items-center gap-5 p-5 text-slate-400 hover:text-white hover:bg-white/5 rounded-[1.5rem] transition-all border border-transparent hover:border-white/5"
   >
-    {icon}
-    <span className="font-medium">{label}</span>
+    <div className="p-3 bg-white/5 rounded-xl text-blue-500">{icon}</div>
+    <span className="font-black text-xs uppercase tracking-widest">{label}</span>
   </Link>
+);
+
+const TrendingUp = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
 );
 
 const ReceiptText = ({ className }: { className?: string }) => (

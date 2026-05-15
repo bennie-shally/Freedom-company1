@@ -100,64 +100,70 @@ export const WithdrawPage: React.FC = () => {
   }
 
   return (
-    <div className="p-8 flex flex-col gap-10 pb-24 text-white">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-black tracking-tight">Extract Wealth</h1>
-        <p className="text-slate-500 text-sm font-medium">Safe channel for fund extraction to your GCash Node.</p>
+    <div className="flex flex-col gap-10 pb-32 pt-4 px-6 text-white overflow-hidden">
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-2">
+           <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+           <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Withdraw Funds</span>
+        </div>
+        <h1 className="text-4xl font-black tracking-tighter uppercase italic tracking-widest">Withdraw <span className="text-blue-500">Money</span></h1>
+        <p className="text-slate-500 text-[10px] font-bold uppercase tracking-[0.1em] leading-relaxed">
+          Request a withdrawal of your earnings. Funds will be sent directly to your GCash account.
+        </p>
       </div>
 
-      <div className="glass-panel border-white/10 rounded-[2.5rem] p-8 flex flex-col gap-4 relative overflow-hidden group">
-        <div className="absolute -top-10 -right-10 w-24 h-24 bg-blue-500/20 blur-2xl rounded-full" />
-        <div className="flex flex-col gap-2 relative z-10">
-          <span className="text-[9px] text-slate-500 uppercase font-black tracking-[0.3em]">Available Cryptic Pool</span>
-          <span className="text-4xl font-black text-white">
+      <div className="bg-[#121212] border border-white/5 rounded-[2.5rem] p-8 flex flex-col gap-4 relative overflow-hidden backdrop-blur-xl">
+        <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/10 blur-3xl rounded-full" />
+        <div className="flex flex-col gap-1 relative z-10">
+          <span className="text-[10px] text-slate-600 uppercase font-black tracking-[0.4em]">Available Balance</span>
+          <span className="text-5xl font-black text-white italic tracking-tighter uppercase leading-none mt-2">
             {formatCurrency(userData?.balance || 0)}
           </span>
         </div>
       </div>
 
       <form onSubmit={handleWithdraw} className="flex flex-col gap-10">
-        <div className="flex flex-col gap-3">
-          <label className="text-[9px] font-black uppercase text-slate-500 tracking-[0.2em] ml-1">Extraction Amount (PHP)</label>
+        <div className="space-y-4">
+          <label className="text-[9px] font-black uppercase text-slate-600 tracking-[0.3em] ml-2 italic">Withdraw Amount (PHP)</label>
           <input
             type="number"
             required
             placeholder="0.00"
-            className="w-full glass-panel border-white/10 rounded-[1.5rem] p-6 text-white text-2xl font-black placeholder:text-slate-800 outline-none focus:border-blue-500/30 transition-all font-mono"
+            className="w-full bg-white/5 border border-white/5 rounded-[1.5rem] p-8 text-white text-4xl font-black italic tracking-tighter placeholder:text-slate-800 outline-none focus:bg-white/10 transition-all shadow-inner"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
           />
-          <div className="flex justify-between px-2 mt-2">
-            <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest">Protocol Fee: {settings?.withdrawalFeePercent}%</span>
-            <span className="text-[10px] text-emerald-400 font-black uppercase tracking-widest">Net: {formatCurrency(net)}</span>
+          <div className="flex justify-between px-4">
+            <span className="text-[8px] text-slate-600 font-black uppercase tracking-widest italic">Withdrawal Fee: {settings?.withdrawalFeePercent}%</span>
+            <span className="text-[8px] text-emerald-400 font-black uppercase tracking-widest italic">Net Received: {formatCurrency(net)}</span>
           </div>
         </div>
 
-        <div className="flex flex-col gap-3">
-          <label className="text-[9px] font-black uppercase text-slate-500 tracking-[0.2em] ml-1">GCash Endpoint Details</label>
+        <div className="space-y-4">
+          <label className="text-[9px] font-black uppercase text-slate-600 tracking-[0.3em] ml-2 italic">Your GCash Details</label>
           <textarea
             required
-            placeholder="GCash: 09********* - Name: [IDENTITY]"
-            className="w-full glass-panel border-white/10 rounded-[1.5rem] p-6 text-white text-sm font-bold placeholder:text-slate-800 outline-none focus:border-blue-500/30 transition-all h-40 resize-none leading-relaxed"
+            placeholder="GCash Name & Number"
+            className="w-full bg-white/5 border border-white/5 rounded-[2rem] p-6 text-white text-sm font-bold placeholder:text-slate-800 outline-none focus:bg-white/10 transition-all h-32 resize-none leading-relaxed shadow-inner"
             value={bankDetails}
             onChange={(e) => setBankDetails(e.target.value)}
           />
         </div>
 
-        <div className="flex gap-4 p-6 bg-slate-900/40 rounded-[2rem] border border-white/5">
-          <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center shrink-0">
-            <AlertCircle className="w-5 h-5 text-slate-600" />
-          </div>
-          <p className="text-[9px] text-slate-600 uppercase font-black leading-loose tracking-[0.1em]">
-            Min: {formatCurrency(settings?.minWithdrawal || 500)} | Cycles: 1-24hrs | Verification Required
+        <div className="p-6 bg-[#121212] rounded-[2rem] border border-white/5 flex items-start gap-4">
+          <AlertCircle className="w-5 h-5 text-slate-600 shrink-0 mt-0.5" />
+          <p className="text-[8px] text-slate-600 uppercase font-black leading-relaxed tracking-[0.2em]">
+            Min Withdrawal: {formatCurrency(settings?.minWithdrawal || 500)}<br/>
+            Processing Time: 1-24 hours<br/>
+            Status: Active
           </p>
         </div>
 
         <button
           disabled={loading || !amount || !bankDetails || (Number(amount) > (userData?.balance || 0))}
-          className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-[2rem] shadow-2xl shadow-blue-900/40 active:scale-[0.98] transition-all disabled:opacity-50 text-[11px] uppercase tracking-[0.3em]"
+          className="w-full py-5 bg-white text-black font-black uppercase tracking-[0.2em] text-[10px] rounded-[1.5rem] shadow-[0_0_50px_rgba(255,255,255,0.1)] active:scale-[0.98] transition-all disabled:opacity-50"
         >
-          {loading ? 'Decrypting...' : 'Initiate Extraction'}
+          {loading ? 'Processing...' : 'Request Withdrawal'}
         </button>
       </form>
     </div>

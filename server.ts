@@ -22,8 +22,8 @@ if (admin.apps.length === 0) {
   });
 }
 
-// Get Admin Firestore with correct database ID
-const adminDb = getAdminFirestore(admin.app(), (firebaseConfig as any).firestoreDatabaseId || '(default)');
+const adminDb = admin.firestore();
+// If you use a non-default database, you'd use admin.firestore(databaseId)
 
 async function startServer() {
   const app = express();
@@ -44,6 +44,7 @@ async function startServer() {
       console.log(`[Worker] Found ${snapshot.size} matured investments. Processing...`);
 
       const batch = adminDb.batch();
+      let count = 0;
       
       for (const investmentDoc of snapshot.docs) {
         const inv = investmentDoc.data();
@@ -60,12 +61,16 @@ async function startServer() {
           balance: admin.firestore.FieldValue.increment(inv.totalReturn || 0),
           totalEarnings: admin.firestore.FieldValue.increment(inv.profit || 0)
         });
+        count++;
       }
 
-      await batch.commit();
-      console.log(`[Worker] Successfully credited ${snapshot.size} payouts.`);
-    } catch (error) {
-      console.error("[Worker] Error in maturation loop:", error);
+      if (count > 0) {
+        await batch.commit();
+        console.log(`[Worker] Successfully credited ${count} payouts.`);
+      }
+    } catch (error: any) {
+      // Log more detail if it's a permission error
+      console.error("[Worker] Error in maturation loop:", error.message || error);
     }
   }, 60000); // 1 minute interval
 

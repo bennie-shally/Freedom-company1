@@ -74,7 +74,7 @@ export const LoanApplicationPage: React.FC = () => {
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="text-right">
-          <h1 className="text-2xl font-black text-white italic tracking-tighter uppercase">Application</h1>
+          <h1 className="text-2xl font-black text-white italic tracking-tighter uppercase">Loan Application</h1>
           <p className="text-[10px] text-blue-400 font-black uppercase tracking-[0.2em]">{formatCurrency(parseFloat(amount || '0'))}</p>
         </div>
       </div>
@@ -127,7 +127,7 @@ export const LoanApplicationPage: React.FC = () => {
       {/* Safety Notice */}
       <div className="px-10 text-center opacity-40">
         <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest leading-relaxed">
-          Your data is encrypted using 256-bit AES protection. Freedom Company never shares your data with third parties.
+          Your data is safe and secure. Freedom Company never shares your data with third parties.
         </p>
       </div>
     </div>
