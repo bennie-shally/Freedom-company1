@@ -171,10 +171,10 @@ export const AdminDashboard: React.FC = () => {
         <nav className="flex flex-col gap-2">
           <SidebarLink active={activeTab === 'overview'} icon={<BarChart3 className="w-5 h-5"/>} label="Overview" onClick={() => setActiveTab('overview')} />
           <SidebarLink active={activeTab === 'users'} icon={<Users className="w-5 h-5"/>} label="Users" onClick={() => setActiveTab('users')} />
-          <SidebarLink active={activeTab === 'plans'} icon={<ReceiptText className="w-5 h-5"/>} label="Investment Plans" onClick={() => setActiveTab('plans')} />
+          <SidebarLink active={activeTab === 'plans'} icon={<ReceiptText className="w-5 h-5"/>} label="Invest Plans" onClick={() => setActiveTab('plans')} />
           <SidebarLink active={activeTab === 'deposits'} icon={<ArrowDownLeft className="w-5 h-5"/>} label="Deposits" onClick={() => setActiveTab('deposits')} />
           <SidebarLink active={activeTab === 'withdrawals'} icon={<ArrowUpRight className="w-5 h-5"/>} label="Withdrawals" onClick={() => setActiveTab('withdrawals')} />
-          <SidebarLink active={activeTab === 'loans'} icon={<Wallet className="w-5 h-5"/>} label="Loan Applications" onClick={() => setActiveTab('loans')} />
+          <SidebarLink active={activeTab === 'loans'} icon={<Wallet className="w-5 h-5"/>} label="Loans" onClick={() => setActiveTab('loans')} />
           <SidebarLink active={activeTab === 'chats'} icon={<MessageSquare className="w-5 h-5"/>} label="Live Chats" onClick={() => setActiveTab('chats')} />
           <SidebarLink active={activeTab === 'settings'} icon={<Settings className="w-5 h-5"/>} label="System Settings" onClick={() => setActiveTab('settings')} />
           <div className="mt-auto pt-4 border-t border-white/5">
@@ -334,7 +334,7 @@ const AdminPlans = () => {
 
     const deletePlan = async (id: string) => {
         // Use a standard non-blocking confirm if window.confirm is quirky
-        const confirmed = window.confirm('RECOVERY ALERT: Are you sure you want to permanently delete this Matrix Node? This action is irreversible.');
+        const confirmed = window.confirm('Are you sure you want to permanently delete this Investment Plan? This action is irreversible.');
         if (!confirmed) return;
         
         try {
@@ -342,9 +342,9 @@ const AdminPlans = () => {
             await deleteDoc(doc(db, 'investment_plans', id));
             console.log("Plan deleted successfully");
         } catch (err: any) {
-            console.error("Critical Failure: Delete operation rejected by cloud node.", err);
+            console.error("Error: Delete operation failed.", err);
             handleFirestoreError(err, OperationType.DELETE, `investment_plans/${id}`);
-            alert(`OPERATIONAL ERROR: ${err.message || 'Access Denied. Check System Rules.'}`);
+            alert(`ERROR: ${err.message || 'Access Denied.'}`);
         }
     };
 
@@ -365,8 +365,8 @@ const AdminPlans = () => {
                     <div className="col-span-full py-20 bg-brand-muted/20 border border-dashed border-white/10 rounded-[32px] flex flex-col items-center justify-center text-center gap-4 opacity-50">
                         <ReceiptText className="w-12 h-12" />
                         <div className="flex flex-col">
-                            <span className="font-bold uppercase tracking-widest text-sm">No Active Nodes</span>
-                            <p className="text-[10px] uppercase font-bold text-gray-500">Initialize a new investment plan to begin intake</p>
+                            <span className="font-bold uppercase tracking-widest text-sm">No Active Plans</span>
+                            <p className="text-[10px] uppercase font-bold text-gray-500">Add a new investment plan to begin</p>
                         </div>
                     </div>
                 ) : (
@@ -392,7 +392,7 @@ const AdminPlans = () => {
                                             setIsAdding(true); 
                                         }}
                                         className="p-2 bg-white/5 hover:bg-brand-primary hover:text-black rounded-lg transition-all"
-                                        title="Edit Node"
+                                        title="Edit Plan"
                                     >
                                         <Settings className="w-4 h-4" />
                                     </button>
@@ -402,7 +402,7 @@ const AdminPlans = () => {
                                             deletePlan(p.id);
                                         }}
                                         className="p-2 bg-white/5 hover:bg-red-500 hover:text-white rounded-lg transition-all"
-                                        title="Delete Node"
+                                        title="Delete Plan"
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </button>
@@ -438,7 +438,7 @@ const AdminPlans = () => {
                             className="bg-brand-muted border border-white/10 w-full max-w-xl rounded-[40px] p-10 flex flex-col gap-8 shadow-2xl"
                         >
                             <div className="flex justify-between items-center">
-                                <h3 className="text-2xl font-black uppercase tracking-tight">{editingPlan ? 'Edit Plan' : 'New Matrix Node'}</h3>
+                                <h3 className="text-2xl font-black uppercase tracking-tight">{editingPlan ? 'Edit Plan' : 'New Plan'}</h3>
                                 <button onClick={() => { setIsAdding(false); setEditingPlan(null); }} className="p-3 bg-white/5 rounded-full"><X className="w-6 h-6"/></button>
                             </div>
 
@@ -456,7 +456,7 @@ const AdminPlans = () => {
                                 </div>
 
                                 <button className="w-full py-5 bg-brand-primary text-black font-black uppercase tracking-widest rounded-3xl mt-4 active:scale-95 transition-all">
-                                    {editingPlan ? 'Confirm Matrix Update' : 'Initialize Node'}
+                                    {editingPlan ? 'Update Plan' : 'Create Plan'}
                                 </button>
                             </form>
                         </motion.div>
@@ -480,15 +480,15 @@ const AdminOverview = () => {
 
   return (
     <div className="flex flex-col gap-12">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-4xl font-black tracking-tight text-white uppercase">System Matrix</h2>
-        <p className="text-slate-500 font-medium uppercase tracking-[0.2em] text-[10px]">Real-time operational awareness</p>
-      </div>
+        <div className="flex flex-col gap-2">
+            <h2 className="text-4xl font-black tracking-tight text-white uppercase">System Overview</h2>
+            <p className="text-slate-500 font-medium uppercase tracking-[0.2em] text-[10px]">Real-time operational awareness</p>
+        </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <StatsCard label="Verified Identities" value={stats.users.toString()} icon={<Users className="w-6 h-6"/>} color="text-blue-400" />
-        <StatsCard label="Pending Injections" value={stats.pendingDep.toString()} icon={<ArrowDownLeft className="w-6 h-6"/>} color="text-emerald-400" />
-        <StatsCard label="Pending Extractions" value={stats.pendingWit.toString()} icon={<ArrowUpRight className="w-6 h-6"/>} color="text-red-400" />
+        <StatsCard label="Pending Deposits" value={stats.pendingDep.toString()} icon={<ArrowDownLeft className="w-6 h-6"/>} color="text-emerald-400" />
+        <StatsCard label="Pending Withdrawals" value={stats.pendingWit.toString()} icon={<ArrowUpRight className="w-6 h-6"/>} color="text-red-400" />
       </div>
 
       <div className="glass-panel border-white/10 rounded-[3rem] p-12 flex flex-col items-center justify-center text-center gap-8 relative overflow-hidden">
@@ -497,19 +497,19 @@ const AdminOverview = () => {
           <AdminShield className="w-12 h-12" />
         </div>
         <div className="max-w-lg">
-          <h3 className="text-3xl font-black mb-4 tracking-tight text-white uppercase">Neural Link Active</h3>
+          <h3 className="text-3xl font-black mb-4 tracking-tight text-white uppercase">Admin Systems Secure</h3>
           <p className="text-slate-500 text-sm leading-relaxed font-medium">
-            Core infrastructure is synchronized across all browser nodes. Encryption tunnels (AES-256) are maintaining 99.9% uptime for transaction validation.
+            Maintaining 99.9% uptime for secure transaction validation.
           </p>
         </div>
         <div className="flex gap-4">
             <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 rounded-full border border-emerald-500/20">
                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Database Sync</span>
+                <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Database Active</span>
             </div>
             <div className="flex items-center gap-2 px-4 py-2 bg-blue-500/10 rounded-full border border-blue-500/20">
                 <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-                <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest">HMR Socket</span>
+                <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest">Server Ready</span>
             </div>
         </div>
       </div>
@@ -909,11 +909,21 @@ const AdminLoans = () => {
         return onSnapshot(q, s => setLoans(s.docs.map(d => ({id: d.id, ...d.data()}))), (err) => handleFirestoreError(err, OperationType.LIST, 'loanApplications'));
     }, []);
 
-    const handleAction = async (id: string, status: string) => {
+    const handleAction = async (loan: LoanApplication, status: string) => {
         try {
-            await updateDoc(doc(db, 'loanApplications', id), { status });
+            const batch = writeBatch(db);
+            batch.update(doc(db, 'loanApplications', loan.id), { status });
+            
+            // If approved, increment user balance by the requested amount
+            if (status === 'approved') {
+              batch.update(doc(db, 'users', loan.userId), { 
+                balance: increment(loan.amountRequested) 
+              });
+            }
+            
+            await batch.commit();
         } catch (err: any) {
-            handleFirestoreError(err, OperationType.WRITE, `loanApplications/${id}`);
+            handleFirestoreError(err, OperationType.WRITE, `loanApplications/${loan.id}`);
         }
     };
 
@@ -992,22 +1002,22 @@ const AdminLoans = () => {
 
                             <div className="flex items-center gap-2 border-t lg:border-t-0 border-white/5 pt-6 lg:pt-0">
                                 <button
-                                    onClick={() => handleAction(l.id, 'approved')}
+                                    onClick={() => handleAction(l, 'approved')}
                                     className="flex-1 lg:flex-none p-4 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-black rounded-2xl transition-all flex items-center justify-center"
-                                    title="Approve Injection"
+                                    title="Approve Deposit"
                                 >
                                     <Check className="w-5 h-5" />
                                 </button>
                                 <button
-                                    onClick={() => handleAction(l.id, 'rejected')}
+                                    onClick={() => handleAction(l, 'rejected')}
                                     className="flex-1 lg:flex-none p-4 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-2xl transition-all flex items-center justify-center"
-                                    title="Reject Cycle"
+                                    title="Reject Loan"
                                 >
                                     <X className="w-5 h-5" />
                                 </button>
                                 <button
-                                    onClick={() => handleAction(l.id, 'processing')}
-                                    className="flex-1 lg:flex-none p-4 bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white rounded-2xl transition-all flex items-center justify-center"
+                                    onClick={() => handleAction(l, 'processing')}
+                                    className="flex-1 lg:flex-none p-4 bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white rounded-2xl transition-all flex items-center justify-center"
                                     title="Set Processing"
                                 >
                                     <Settings className="w-5 h-5" />

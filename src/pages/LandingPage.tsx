@@ -39,7 +39,7 @@ export const LandingPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex flex-col gap-16 pb-20 overflow-x-hidden relative min-h-screen">
+    <div className="flex flex-col gap-4 pb-20 overflow-x-hidden relative min-h-screen">
       {/* Hidden Admin Entry */}
       <div 
         onClick={() => navigate('/admin/login')}
@@ -47,11 +47,11 @@ export const LandingPage: React.FC = () => {
         title="Admin Entry"
       />
       {/* Hero Section */}
-      <section className="px-6 md:px-8 pt-10 md:pt-16 text-center relative flex flex-col justify-center min-h-[70vh]">
+      <section className="px-6 md:px-8 pt-8 md:pt-14 text-center relative flex flex-col justify-center min-h-[45vh]">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col items-center gap-6 md:gap-10"
+          className="flex flex-col items-center gap-4 md:gap-6"
         >
           <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-white/5 border border-white/10 text-white/60 text-[9px] font-black uppercase tracking-[0.3em] shadow-xl backdrop-blur-md">
             <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
@@ -67,7 +67,7 @@ export const LandingPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex flex-col w-full max-w-sm gap-4 mt-4">
+          <div className="flex flex-col w-full max-w-sm gap-4 mt-2">
             <Link 
               to={user ? "/dashboard" : "/register"}
               className="group relative py-6 bg-white text-black font-black rounded-[2rem] flex items-center justify-center gap-3 shadow-[0_0_40px_rgba(255,255,255,0.1)] active:scale-95 transition-all overflow-hidden"
@@ -77,13 +77,66 @@ export const LandingPage: React.FC = () => {
               <ChevronRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
             </Link>
             
-            <div className="mt-2 flex flex-col items-center gap-4">
-              <div className="w-px h-12 bg-gradient-to-b from-blue-500 to-transparent" />
-              <div className="flex flex-col items-center gap-1">
+            <div className="mt-0.5 flex flex-col items-center gap-2">
+              <div className="w-px h-6 bg-gradient-to-b from-blue-500 to-transparent" />
+              <div className="flex flex-col items-center gap-0.5">
                 <span className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.3em]">Easy Investments</span>
                 <p className="text-[9px] text-slate-600 font-bold uppercase tracking-widest max-w-[200px]">Start even with zero capital via our Loan system</p>
               </div>
             </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Loan Highlight Section */}
+      <section className="px-6">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          className="relative overflow-hidden bg-gradient-to-br from-blue-600 to-indigo-900 rounded-[2.5rem] p-10 border border-white/10 shadow-2xl"
+        >
+          {/* Decorative icons */}
+          <div className="absolute -top-6 -right-6 opacity-10 rotate-12">
+            <Banknote className="w-32 h-32 text-white" />
+          </div>
+          <div className="absolute -bottom-10 -left-10 opacity-5 -rotate-12">
+            <ShieldCheck className="w-40 h-40 text-white" />
+          </div>
+
+          <div className="relative z-10 space-y-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 border border-white/20 rounded-full">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+              <span className="text-[9px] font-black text-white uppercase tracking-widest">Freedom Capital</span>
+            </div>
+            
+            <div className="space-y-3">
+              <h2 className="text-3xl md:text-5xl font-black text-white tracking-tighter uppercase italic leading-none">
+                Start Growing <br/> Without <span className="text-blue-300 underline decoration-blue-400 underline-offset-4">Capital</span>
+              </h2>
+              <p className="text-blue-100/70 text-[10px] md:text-xs font-black uppercase tracking-widest max-w-sm leading-relaxed">
+                Freedom Company empowers everyone to build wealth. Our exclusive Loan System provides instant capital for your first investment plan. 
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-white/10">
+              <div className="flex flex-col">
+                <span className="text-[8px] font-black text-white/50 uppercase tracking-widest">Processing Time</span>
+                <span className="text-white font-black">FAST APPROVAL</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[8px] font-black text-white/50 uppercase tracking-widest">Max Loan</span>
+                <span className="text-white font-black">₱100,000.00</span>
+              </div>
+            </div>
+
+            <Link 
+              to="/loans"
+              className="inline-flex items-center gap-3 px-8 py-4 bg-white text-blue-900 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-50 transition-all active:scale-95"
+            >
+              Learn More About Loans
+              <ChevronRight className="w-4 h-4" />
+            </Link>
           </div>
         </motion.div>
       </section>

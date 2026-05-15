@@ -9,11 +9,11 @@ import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { formatCurrency, cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowDownLeft, ArrowUpRight, TrendingUp, History, Filter } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, TrendingUp, History, Filter, Banknote } from 'lucide-react';
 import { format } from 'date-fns';
 import { handleFirestoreError, OperationType } from '../lib/errorHandlers';
 
-type Tab = 'all' | 'deposits' | 'withdrawals' | 'investments';
+type Tab = 'all' | 'deposits' | 'withdrawals' | 'investments' | 'loans';
 
 export const HistoryPage: React.FC = () => {
   const { user } = useAuth();
@@ -29,7 +29,7 @@ export const HistoryPage: React.FC = () => {
 
     const fetchData = () => {
       if (activeTab === 'all') {
-        const collections = ['investments', 'deposits', 'withdrawals'];
+        const collections = ['investments', 'deposits', 'withdrawals', 'loanApplications'];
         const collectionResults: Record<string, any[]> = {};
         
         collections.forEach(col => {
@@ -40,7 +40,12 @@ export const HistoryPage: React.FC = () => {
           );
 
           const unsub = onSnapshot(q, (snapshot) => {
-            collectionResults[col] = snapshot.docs.map(doc => ({ id: doc.id, type: col, ...doc.data() }));
+            const mapped = snapshot.docs.map(doc => ({ 
+              id: doc.id, 
+              type: col === 'loanApplications' ? 'loans' : col, 
+              ...doc.data() 
+            }));
+            collectionResults[col] = mapped;
             
             // Merge all current results and sort client-side to avoid index errors
             const merged = Object.values(collectionResults)
@@ -60,7 +65,7 @@ export const HistoryPage: React.FC = () => {
           unsubs.push(unsub);
         });
       } else {
-        const col = activeTab;
+        const col = activeTab === 'loans' ? 'loanApplications' : activeTab;
         const q = query(
           collection(db, col),
           where('userId', '==', user.uid),
@@ -69,7 +74,7 @@ export const HistoryPage: React.FC = () => {
 
         const unsub = onSnapshot(q, (snapshot) => {
           const sorted = snapshot.docs
-            .map(doc => ({ id: doc.id, type: col, ...doc.data() }))
+            .map(doc => ({ id: doc.id, type: activeTab, ...doc.data() }))
             .sort((a: any, b: any) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
           setData(sorted);
           setLoading(false);
@@ -100,6 +105,7 @@ export const HistoryPage: React.FC = () => {
         <TabButton active={activeTab === 'investments'} label="Plans" onClick={() => setActiveTab('investments')} />
         <TabButton active={activeTab === 'deposits'} label="Deposit" onClick={() => setActiveTab('deposits')} />
         <TabButton active={activeTab === 'withdrawals'} label="Withdraw" onClick={() => setActiveTab('withdrawals')} />
+        <TabButton active={activeTab === 'loans'} label="Loans" onClick={() => setActiveTab('loans')} />
       </div>
 
       {/* List */}
@@ -146,6 +152,7 @@ const TransactionItem: React.FC<{ item: any, tab: Tab }> = ({ item, tab }) => {
   const getIcon = () => {
     if (item.type === 'deposits') return <ArrowDownLeft className="w-5 h-5" />;
     if (item.type === 'withdrawals') return <ArrowUpRight className="w-5 h-5" />;
+    if (item.type === 'loans') return <Banknote className="w-5 h-5" />;
     return <TrendingUp className="w-5 h-5" />;
   };
 
@@ -154,13 +161,15 @@ const TransactionItem: React.FC<{ item: any, tab: Tab }> = ({ item, tab }) => {
       case 'approved': 
       case 'completed': return 'text-emerald-500';
       case 'pending': 
-      case 'running': return 'text-blue-400';
+      case 'running': 
+      case 'processing': return 'text-blue-400';
       case 'rejected': return 'text-red-500';
       default: return 'text-slate-500';
     }
   };
 
-  const amount = item.amount || item.totalReturn || 0;
+  const amount = item.amount || item.amountRequested || item.totalReturn || 0;
+  const itemName = item.planName || (item.type === 'deposits' ? 'Deposit' : item.type === 'withdrawals' ? 'Withdrawal' : 'Loan Application');
   const dateField = item.createdAt || item.startedAt;
   const date = dateField 
     ? format(dateField.toDate?.() || new Date(dateField), 'MMM dd, hh:mm a') 
@@ -180,7 +189,7 @@ const TransactionItem: React.FC<{ item: any, tab: Tab }> = ({ item, tab }) => {
           {getIcon()}
         </div>
         <div className="flex flex-col gap-1">
-          <p className="font-black text-xs text-white uppercase tracking-tight">{item.planName || (item.type === 'deposits' ? 'Deposit' : 'Withdrawal')}</p>
+          <p className="font-black text-xs text-white uppercase tracking-tight">{itemName}</p>
           <div className="flex items-center gap-2">
             <span className={cn("text-[8px] font-black uppercase tracking-widest", getStatusColor(item.status))}>
               {item.status}

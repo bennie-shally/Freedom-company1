@@ -98,23 +98,24 @@ export const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col gap-8 pb-32 pt-4 px-5">
+    <div className="flex flex-col gap-6 pb-36 pt-4 px-6 md:px-10 max-w-4xl mx-auto">
       {/* User Header */}
-      <div className="flex justify-between items-center bg-white/5 p-4 rounded-[2rem] border border-white/5 backdrop-blur-md">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl flex items-center justify-center border border-white/20 shadow-[0_0_20px_rgba(59,130,246,0.3)]">
-            <span className="text-sm font-black text-white">{userData.username.substring(0, 2).toUpperCase()}</span>
+      <div className="flex justify-between items-center bg-white/5 p-5 rounded-[2.5rem] border border-white/5 backdrop-blur-md shadow-xl">
+        <div className="flex items-center gap-5">
+          <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-[1.25rem] flex items-center justify-center border border-white/20 shadow-[0_0_25px_rgba(59,130,246,0.3)]">
+            <span className="text-base font-black text-white">{userData.username.substring(0, 2).toUpperCase()}</span>
           </div>
           <div className="flex flex-col">
-            <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] leading-tight mb-0.5">Account Overview</p>
-            <h2 className="text-lg font-black tracking-tighter uppercase italic">{userData.username}</h2>
+            <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.3em] leading-tight mb-1">Authenticated Node</p>
+            <h2 className="text-xl font-black tracking-tighter uppercase italic leading-none">{userData.username}</h2>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex flex-col items-end">
-             <span className="text-[8px] font-black text-emerald-400 uppercase tracking-widest px-2 py-0.5 bg-emerald-400/10 rounded-full border border-emerald-400/20">VERIFIED</span>
-             <span className="text-[7px] font-bold text-slate-600 mt-1 uppercase tracking-tighter">SECURE SERVER</span>
+        <div className="flex flex-col items-end">
+          <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest leading-none">ACTIVE</span>
           </div>
+          <span className="text-[8px] font-bold text-slate-700 mt-1 uppercase tracking-widest">v4.2 PROTECTED</span>
         </div>
       </div>
 
@@ -122,116 +123,151 @@ export const Dashboard: React.FC = () => {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative group h-64 overflow-hidden rounded-[3rem]"
+        className="relative group h-72 overflow-hidden rounded-[3rem] shadow-2xl"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-indigo-900 shadow-2xl" />
-        {/* Abstract Shapes */}
-        <div className="absolute -top-12 -right-12 w-48 h-48 bg-white/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-blue-400/20 rounded-full blur-3xl" />
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none" />
-
-        <div className="relative h-full flex flex-col justify-between p-8">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-950" />
+        
+        {/* Visual elements */}
+        <div className="absolute top-0 right-0 p-10 opacity-10 group-hover:rotate-12 group-hover:scale-110 transition-all duration-700">
+           <Wallet className="w-40 h-40 text-white" />
+        </div>
+        <div className="absolute -top-20 -right-20 w-64 h-64 bg-blue-400/20 rounded-full blur-[100px]" />
+        <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-indigo-500/30 rounded-full blur-[100px]" />
+        
+        <div className="relative h-full flex flex-col justify-between p-10">
           <div className="flex justify-between items-start">
-            <div className="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
-              <ShieldCheck className="w-5 h-5 text-white" />
+            <div className="p-4 bg-white/10 backdrop-blur-xl rounded-[1.25rem] border border-white/20 shadow-xl">
+              <ShieldCheck className="w-6 h-6 text-white" />
             </div>
-            <div className="flex flex-col items-end gap-1">
-              <span className="text-[10px] font-black text-white/50 uppercase tracking-widest">Main Balance</span>
-              <div className="flex gap-2">
-                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              </div>
+            <div className="text-right">
+              <p className="text-[11px] font-black text-white/40 uppercase tracking-[0.3em]">Institutional Node</p>
+              <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mt-1">Real-time Balance</p>
             </div>
           </div>
 
-          <div className="space-y-1">
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">Total Balance</p>
-            <h2 className="text-4xl xs:text-5xl font-black text-white tracking-tighter">
+          <div className="space-y-2">
+            <p className="text-[10px] font-black uppercase tracking-[0.5em] text-white/50">Available Funds</p>
+            <h2 className="text-5xl xs:text-6xl font-black text-white tracking-tighter drop-shadow-lg">
               {formatCurrency(userData.balance)}
             </h2>
           </div>
 
-          <div className="flex gap-3 mt-4">
-             <button onClick={() => navigate('/deposit')} className="flex-1 py-4 bg-white text-blue-900 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl active:scale-95 transition-all">DEPOSIT</button>
-             <button onClick={() => navigate('/withdraw')} className="flex-1 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl active:scale-95 transition-all">WITHDRAW</button>
+          <div className="flex gap-4 mt-6">
+             <button 
+               onClick={() => navigate('/deposit')} 
+               className="flex-1 py-5 bg-white text-blue-900 rounded-[1.5rem] text-[11px] font-black uppercase tracking-[0.2em] shadow-xl active:scale-95 transition-all hover:bg-blue-50"
+             >
+               DEPOSIT
+             </button>
+             <button 
+               onClick={() => navigate('/withdraw')} 
+               className="flex-1 py-5 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-[1.5rem] text-[11px] font-black uppercase tracking-[0.2em] shadow-xl active:scale-95 transition-all hover:bg-white/15"
+             >
+               WITHDRAW
+             </button>
           </div>
         </div>
       </motion.div>
 
+      {/* Live Market Analysis Chart */}
+      <section className="flex flex-col gap-5">
+        <div className="flex items-center gap-3 px-2">
+           <div className="p-2.5 bg-blue-500/10 rounded-xl border border-blue-500/20">
+              <TrendingUp className="w-4 h-4 text-blue-400" />
+           </div>
+           <div>
+              <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-white">Live Market Analysis</h3>
+              <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Real-time Cryptographic Yield Cycles</p>
+           </div>
+        </div>
+        <TradingChart />
+      </section>
+
       {/* Loan Callout for Investors without money */}
       <section className="flex flex-col gap-4">
-        <div className="glass-panel border-emerald-500/20 bg-emerald-500/5 rounded-[2rem] p-6 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform">
-             <Banknote className="w-16 h-16 text-emerald-400" />
+        <div className="glass-panel border-emerald-500/20 bg-emerald-500/5 rounded-[2.5rem] p-8 relative overflow-hidden group shadow-lg">
+          <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
+             <Banknote className="w-32 h-32 text-emerald-400" />
           </div>
-          <div className="relative z-10 space-y-3">
+          <div className="relative z-10 space-y-4">
              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Investment Opportunity</span>
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest leading-none">Investment Support</span>
              </div>
-             <h4 className="text-lg font-black text-white italic tracking-tighter uppercase leading-tight">No money to invest?</h4>
-             <p className="text-[10px] text-slate-400 font-medium leading-relaxed max-w-[220px]">
-               Freedom Loans provides the capital you need to start earning today. Apply now and grow your wealth.
-             </p>
+             <div className="space-y-2">
+                <h4 className="text-2xl font-black text-white italic tracking-tighter uppercase leading-none">Capital Deficit?</h4>
+                <p className="text-[11px] text-slate-400 font-medium leading-relaxed max-w-sm">
+                  Our instant loan system provides the necessary leverage for users to initiate High-Yield growth plans without initial personal funds. 
+                </p>
+             </div>
              <button 
                onClick={() => navigate('/loans')}
-               className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-emerald-900/40"
+               className="px-8 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl shadow-emerald-900/40 active:scale-95 flex items-center gap-3"
              >
-               Apply for a Loan
+               Apply for a Loan <ChevronRight className="w-4 h-4" />
              </button>
           </div>
         </div>
       </section>
 
-      {/* Stats Mini Grid */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white/5 backdrop-blur-md p-6 rounded-[2.5rem] border border-white/5 flex flex-col gap-3 relative overflow-hidden group">
-          <div className="absolute -top-10 -right-10 w-24 h-24 bg-emerald-500/10 blur-2xl group-hover:bg-emerald-500/20 transition-all" />
-          <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
-             <TrendingUp className="w-5 h-5" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-[9px] uppercase font-black tracking-[0.3em] text-slate-500 mb-1">Total Earnings</span>
-            <span className="text-xl font-black text-emerald-400 tracking-tighter">+{formatCurrency(userData.totalEarnings)}</span>
-          </div>
-        </div>
-        <div className="bg-white/5 backdrop-blur-md p-6 rounded-[2.5rem] border border-white/5 flex flex-col gap-3 relative overflow-hidden group">
-          <div className="absolute -top-10 -right-10 w-24 h-24 bg-blue-500/10 blur-2xl group-hover:bg-blue-500/20 transition-all" />
-          <div className="w-10 h-10 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400">
-             <Clock className="w-5 h-5" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-[9px] uppercase font-black tracking-[0.3em] text-slate-500 mb-1">Active</span>
-            <span className="text-xl font-black text-blue-400 tracking-tighter">{activeInvestments.length} Investments</span>
-          </div>
-        </div>
+      {/* Primary Navigation Grid */}
+      <div className="grid grid-cols-4 gap-4">
+        <MenuIcon emoji="🚀" label="Invest" onClick={() => navigate('/plans')} />
+        <MenuIcon emoji="💰" label="Loans" onClick={() => navigate('/loans')} />
+        <MenuIcon emoji="🤝" label="Refer" onClick={() => navigate('/referral')} />
+        <MenuIcon emoji="📄" label="History" onClick={() => navigate('/history')} />
       </div>
 
-      {/* Menu Grid - Premium Mobile Navigation */}
-      <div className="grid grid-cols-4 gap-3">
-        <MenuIcon emoji="📈" label="Invest" onClick={() => navigate('/plans')} />
-        <MenuIcon emoji="🤝" label="Loans" onClick={() => navigate('/loans')} />
-        <MenuIcon emoji="👥" label="Refer" onClick={() => navigate('/referral')} />
-        <MenuIcon emoji="📜" label="History" onClick={() => navigate('/history')} />
+      {/* Stats Mini Grid */}
+      <div className="grid grid-cols-2 gap-5">
+        <div className="bg-white/5 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/5 flex flex-col gap-4 relative overflow-hidden group shadow-lg">
+          <div className="absolute -top-12 -right-12 w-32 h-32 bg-emerald-500/5 blur-3xl group-hover:bg-emerald-500/15 transition-all duration-500" />
+          <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/10">
+             <TrendingUp className="w-6 h-6" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] uppercase font-black tracking-[0.4em] text-slate-500">Cumulative Returns</span>
+            <span className="text-2xl font-black text-white tracking-tighter">{formatCurrency(userData.totalEarnings)}</span>
+            <span className="text-[8px] text-emerald-400 font-black uppercase tracking-widest mt-1">Validated Growth</span>
+          </div>
+        </div>
+        <div className="bg-white/5 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/5 flex flex-col gap-4 relative overflow-hidden group shadow-lg">
+          <div className="absolute -top-12 -right-12 w-32 h-32 bg-blue-500/5 blur-3xl group-hover:bg-blue-500/15 transition-all duration-500" />
+          <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/10">
+             <Clock className="w-6 h-6" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] uppercase font-black tracking-[0.4em] text-slate-500">Active Nodes</span>
+            <span className="text-2xl font-black text-white tracking-tighter">{activeInvestments.length} <span className="text-sm font-black text-blue-400/50 italic opacity-50 ml-1">UNITS</span></span>
+            <span className="text-[8px] text-blue-400 font-black uppercase tracking-widest mt-1">Uptime: 99.9%</span>
+          </div>
+        </div>
       </div>
 
       {/* Active Investments */}
-      <section className="flex flex-col gap-4">
-        <div className="flex justify-between items-center">
-          <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Active Investments</h3>
-          <Link to="/plans" className="text-[10px] text-blue-400 font-black uppercase tracking-widest">New Plan</Link>
+      <section className="flex flex-col gap-6">
+        <div className="flex justify-between items-end px-2">
+          <div className="flex flex-col">
+             <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-white">Production Cycles</h3>
+             <p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">Your active interest nodes</p>
+          </div>
+          <Link to="/plans" className="text-[10px] text-blue-400 font-black uppercase tracking-wider px-4 py-1.5 bg-blue-400/5 rounded-full border border-blue-400/10 hover:bg-blue-400/10 transition-colors">INITIATE NODE</Link>
         </div>
 
         {activeInvestments.length === 0 ? (
-          <div className="bg-slate-800/30 border border-white/5 rounded-3xl p-10 text-center flex flex-col items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-slate-600">
-              <TrendingUp className="w-6 h-6" />
+          <div className="bg-[#121212]/50 border border-dashed border-white/10 rounded-[2.5rem] p-16 text-center flex flex-col items-center gap-6 group">
+            <div className="w-16 h-16 rounded-[2rem] bg-white/5 flex items-center justify-center text-slate-700 transition-all group-hover:scale-110 group-hover:text-blue-500/50">
+              <Zap className="w-8 h-8" />
             </div>
-            <p className="text-slate-500 text-xs font-medium">You have no active investments.</p>
+            <div className="space-y-2">
+              <p className="text-white text-[11px] font-black uppercase tracking-[0.2em]">No Active Production</p>
+              <p className="text-slate-600 text-[9px] font-bold uppercase tracking-widest max-w-[200px] mx-auto leading-relaxed">System is idle. Launch your first production cycle to begin earnings.</p>
+            </div>
             <button 
               onClick={() => navigate('/plans')}
-              className="mt-2 text-blue-400 text-[10px] font-black uppercase tracking-widest px-6 py-2.5 bg-blue-400/10 rounded-xl border border-blue-400/20"
+              className="px-10 py-4 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-2xl active:scale-95 transition-all"
             >
-              Invest Now
+              Start Earning
             </button>
           </div>
         ) : (
@@ -243,32 +279,35 @@ export const Dashboard: React.FC = () => {
         )}
       </section>
 
-      {/* Quick Access List */}
-      <div className="grid grid-cols-5 gap-3 md:gap-4 mt-2">
+      {/* Quick Utilities List */}
+      <div className="grid grid-cols-5 gap-3 mt-4">
         <MenuIcon emoji="💳" label="Deposit" onClick={() => navigate('/deposit')} />
         <MenuIcon emoji="💸" label="Withdraw" onClick={() => navigate('/withdraw')} />
         <MenuIcon emoji="📊" label="History" onClick={() => navigate('/history')} />
-        <MenuIcon emoji="📱" label="Support" onClick={() => navigate('/chat')} />
-        <MenuIcon emoji="👤" label="Profile" onClick={() => navigate('/profile')} />
+        <MenuIcon emoji="💬" label="Support" onClick={() => navigate('/chat')} />
+        <MenuIcon emoji="👤" label="ID" onClick={() => navigate('/profile')} />
       </div>
 
-      {/* Live Payouts (Social Proof) */}
-      <section className="flex flex-col gap-4">
-        <div className="flex justify-between items-center px-2">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Live Payouts</h3>
+      {/* Live System Activity (Social Proof) */}
+      <section className="flex flex-col gap-5 pt-4">
+        <div className="flex justify-between items-center px-4">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
+            <h3 className="text-[11px] font-black uppercase tracking-[0.3em] text-white">Network Activity</h3>
           </div>
-          <span className="text-[8px] font-black text-blue-400 bg-blue-400/5 px-2 py-0.5 rounded-md border border-blue-400/10">ACTIVITY: HIGH</span>
+          <div className="flex items-center gap-2">
+             <Users className="w-3 h-3 text-slate-600" />
+             <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">12.4K ONLINE</span>
+          </div>
         </div>
         <div className="flex flex-col gap-3">
           <AnimatePresence mode="popLayout">
             {activePayouts.map((payout, i) => (
               <motion.div
                 key={`${payout.user}-${i}`}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 10 }}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.3 }}
               >
                 <PayoutItem user={payout.user} amount={payout.amount} />
@@ -276,6 +315,7 @@ export const Dashboard: React.FC = () => {
             ))}
           </AnimatePresence>
         </div>
+        <p className="text-center text-[8px] text-slate-700 font-black uppercase tracking-[0.5em] mt-2">Freedom Company Network v4.2 • Secured</p>
       </section>
     </div>
   );

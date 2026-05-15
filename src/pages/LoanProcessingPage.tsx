@@ -202,22 +202,29 @@ export const LoanProcessingPage: React.FC = () => {
 
           <div className="text-center space-y-6">
              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest bg-slate-800/30 py-4 rounded-2xl border border-white/5">
-               Please contact support for account verification and further assistance.
+                Verification fee must be deposited to initiate the release protocol.
              </p>
 
              <div className="flex flex-col gap-4">
+               <button 
+                 onClick={() => navigate('/deposit')}
+                 className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-3xl flex items-center justify-center gap-3 shadow-xl transition-all active:scale-95 text-xs uppercase tracking-[0.2em]"
+               >
+                 Pay Verification Fee <Download className="w-4 h-4" />
+               </button>
+
                <a 
                  href={supportLink}
                  target="_blank"
                  rel="noreferrer"
-                 className="w-full py-5 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-3xl flex items-center justify-center gap-3 shadow-xl transition-all active:scale-95 text-xs uppercase tracking-[0.2em]"
+                 className="w-full py-4 bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-400 font-black rounded-3xl flex items-center justify-center gap-3 border border-emerald-500/20 transition-all active:scale-95 text-[10px] uppercase tracking-[0.2em]"
                >
                  Contact Official Support <MessageSquare className="w-4 h-4" />
                </a>
                
                <button 
                  onClick={() => navigate('/dashboard')}
-                 className="w-full py-4 text-slate-500 font-black text-[10px] uppercase tracking-[0.3em] hover:text-white transition-colors"
+                 className="w-full py-2 text-slate-600 font-black text-[9px] uppercase tracking-[0.3em] hover:text-white transition-colors"
                >
                  Return to Dashboard
                </button>

@@ -42,9 +42,9 @@ export const TopNav: React.FC = () => {
         )}
         <button 
           onClick={() => setIsOpen(!isOpen)}
-          className="p-3 bg-white/5 rounded-2xl border border-white/5 text-slate-400 active:scale-90 transition-all shadow-inner"
+          className="p-3 bg-white/10 rounded-2xl border border-white/20 text-white active:scale-90 transition-all shadow-lg backdrop-blur-md"
         >
-          {isOpen ? <X className="h-6 w-6 text-white" /> : <Menu className="h-6 w-6 text-white" />}
+          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
       </div>
 
