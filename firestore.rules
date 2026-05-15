@@ -78,6 +78,15 @@ service cloud.firestore {
         );
     }
 
+    function isValidLoanApplication(data) {
+      return data.userId == request.auth.uid
+        && data.fullName is string && data.fullName.size() > 0 && data.fullName.size() < 200
+        && data.bankName is string && data.bankName.size() > 0 && data.bankName.size() < 100
+        && data.accountNumber is string && data.accountNumber.size() > 0 && data.accountNumber.size() < 100
+        && data.amountRequested is number && data.amountRequested > 0
+        && data.status in ['pending', 'approved', 'rejected', 'processing'];
+    }
+
     // --- Collection Rules ---
 
     // Users
@@ -149,6 +158,14 @@ service cloud.firestore {
     match /settings/global {
       allow read: if isSignedIn();
       allow write: if isAdmin();
+    }
+
+    // Loan Applications
+    match /loanApplications/{loanId} {
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (isAdmin() || (resource.data.userId == request.auth.uid));
+      allow create: if isSignedIn() && isValidLoanApplication(incoming());
+      allow update: if isAdmin();
     }
     
     // Investment Plans (admin configurable)

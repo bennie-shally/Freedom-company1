@@ -82,6 +82,26 @@
       },
       "required": ["chatId", "text", "timestamp"]
     },
+    "LoanApplication": {
+      "title": "LoanApplication",
+      "description": "User loan applications",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "fullName": { "type": "string" },
+        "phoneNumber": { "type": "string" },
+        "email": { "type": "string" },
+        "address": { "type": "string" },
+        "bankName": { "type": "string" },
+        "accountNumber": { "type": "string" },
+        "monthlyIncome": { "type": "number" },
+        "amountRequested": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected", "processing"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "fullName", "phoneNumber", "bankName", "accountNumber", "amountRequested", "status", "createdAt"]
+    },
     "SystemSettings": {
       "title": "SystemSettings",
       "description": "Global configuration",
@@ -104,6 +124,7 @@
     "/deposits/{depositId}": { "schema": "Deposit", "description": "Deposit requests" },
     "/withdrawals/{withdrawalId}": { "schema": "Withdrawal", "description": "Withdrawal requests" },
     "/chats/{chatId}/messages/{messageId}": { "schema": "ChatMessage", "description": "Chat messages" },
+    "/loanApplications/{loanId}": { "schema": "LoanApplication", "description": "Loan applications" },
     "/settings/global": { "schema": "SystemSettings", "description": "System wide settings" }
   }
 }

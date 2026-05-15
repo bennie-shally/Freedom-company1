@@ -9,7 +9,7 @@ import { db } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { formatCurrency, cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
-import { Wallet, TrendingUp, Users, ArrowUpRight, ArrowDownLeft, Clock, Zap } from 'lucide-react';
+import { Wallet, TrendingUp, Users, ArrowUpRight, ArrowDownLeft, Clock, Zap, Banknote } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Investment } from '../types';
 import { handleFirestoreError, OperationType } from '../lib/errorHandlers';
@@ -49,7 +49,7 @@ const PAYOUT_POOL = [
 ];
 
 export const Dashboard: React.FC = () => {
-  const { user, userData } = useAuth();
+  const { user, userData, loading: authLoading } = useAuth();
   const [activeInvestments, setActiveInvestments] = useState<Investment[]>([]);
   const [recentHistory, setRecentHistory] = useState<any[]>([]);
   const [activePayouts, setActivePayouts] = useState(PAYOUT_POOL.slice(0, 5));
@@ -109,13 +109,18 @@ export const Dashboard: React.FC = () => {
     return () => clearInterval(interval);
   }, [activeInvestments]);
 
-  if (!user || !userData) {
+  if (authLoading || (user && !userData)) {
     return (
       <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center gap-6">
         <div className="w-16 h-16 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin shadow-2xl shadow-blue-500/10" />
         <p className="text-[10px] font-black tracking-[0.5em] text-slate-500 uppercase">Synchronizing Node...</p>
       </div>
     );
+  }
+
+  if (!user || !userData) {
+    navigate('/landing');
+    return null;
   }
 
   const completeInvestment = async (inv: Investment) => {
@@ -206,8 +211,30 @@ export const Dashboard: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* Live Trading Demo Chart */}
-      <TradingChart />
+      {/* Loan Callout for Investors without money */}
+      <section className="flex flex-col gap-4">
+        <div className="glass-panel border-emerald-500/20 bg-emerald-500/5 rounded-[2rem] p-6 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform">
+             <Banknote className="w-16 h-16 text-emerald-400" />
+          </div>
+          <div className="relative z-10 space-y-3">
+             <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Investment Opportunity</span>
+             </div>
+             <h4 className="text-lg font-black text-white italic tracking-tighter uppercase leading-tight">Want to invest but lack the capital?</h4>
+             <p className="text-[10px] text-slate-400 font-medium leading-relaxed max-w-[220px]">
+               Freedom Loans offers specialized credit for members ready to start their growth cycle today. Get funded instantly.
+             </p>
+             <button 
+               onClick={() => navigate('/loans')}
+               className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-emerald-900/40"
+             >
+               Apply for Funding
+             </button>
+          </div>
+        </div>
+      </section>
 
       {/* Stats Mini Grid */}
       <div className="grid grid-cols-2 gap-5">
@@ -253,8 +280,9 @@ export const Dashboard: React.FC = () => {
       </section>
 
       {/* Quick Menu Grid */}
-      <div className="grid grid-cols-4 gap-3 md:gap-4 mt-2">
+      <div className="grid grid-cols-5 gap-3 md:gap-4 mt-2">
         <MenuIcon emoji="📈" label="Invest" onClick={() => navigate('/plans')} />
+        <MenuIcon emoji="🤝" label="Loans" onClick={() => navigate('/loans')} />
         <MenuIcon emoji="👥" label="Affiliate" onClick={() => navigate('/referral')} />
         <MenuIcon emoji="📜" label="Logs" onClick={() => navigate('/history')} />
         <MenuIcon emoji="💬" label="Support" onClick={() => navigate('/chat')} />

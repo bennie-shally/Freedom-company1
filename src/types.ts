@@ -71,3 +71,18 @@ export interface InvestmentPlan {
   durationHours?: number;
   durationDays?: number;
 }
+
+export interface LoanApplication {
+  id: string;
+  userId: string;
+  fullName: string;
+  phoneNumber: string;
+  email: string;
+  address: string;
+  bankName: string;
+  accountNumber: string;
+  monthlyIncome: number;
+  amountRequested: number;
+  status: 'pending' | 'approved' | 'rejected' | 'processing';
+  createdAt: any;
+}

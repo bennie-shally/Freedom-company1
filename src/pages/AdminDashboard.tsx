@@ -20,8 +20,9 @@ import { motion, AnimatePresence } from 'motion/react';
 import { format } from 'date-fns';
 import { handleFirestoreError, OperationType } from '../lib/errorHandlers';
 import { onMessage } from 'firebase/messaging';
+import { LoanApplication } from '../types';
 
-type AdminTab = 'overview' | 'users' | 'plans' | 'deposits' | 'withdrawals' | 'settings' | 'chats';
+type AdminTab = 'overview' | 'users' | 'plans' | 'deposits' | 'withdrawals' | 'settings' | 'chats' | 'loans';
 
 export const AdminDashboard: React.FC = () => {
   const { user, loading } = useAuth();
@@ -75,7 +76,7 @@ export const AdminDashboard: React.FC = () => {
                     tag: change.doc.id,
                     renotify: true,
                     data: { url: window.location.origin + '/admin' }
-                  });
+                  } as any);
                 });
               } else {
                 const notification = new Notification(`New Message from ${chatData.username || 'User'}`, {
@@ -83,7 +84,7 @@ export const AdminDashboard: React.FC = () => {
                   icon: '/logo.png',
                   tag: change.doc.id,
                   renotify: true
-                });
+                } as any);
                 notification.onclick = () => {
                   window.focus();
                   notification.close();
@@ -173,6 +174,7 @@ export const AdminDashboard: React.FC = () => {
           <SidebarLink active={activeTab === 'plans'} icon={<ReceiptText className="w-5 h-5"/>} label="Investment Plans" onClick={() => setActiveTab('plans')} />
           <SidebarLink active={activeTab === 'deposits'} icon={<ArrowDownLeft className="w-5 h-5"/>} label="Deposits" onClick={() => setActiveTab('deposits')} />
           <SidebarLink active={activeTab === 'withdrawals'} icon={<ArrowUpRight className="w-5 h-5"/>} label="Withdrawals" onClick={() => setActiveTab('withdrawals')} />
+          <SidebarLink active={activeTab === 'loans'} icon={<Wallet className="w-5 h-5"/>} label="Loan Applications" onClick={() => setActiveTab('loans')} />
           <SidebarLink active={activeTab === 'chats'} icon={<MessageSquare className="w-5 h-5"/>} label="Live Chats" onClick={() => setActiveTab('chats')} />
           <SidebarLink active={activeTab === 'settings'} icon={<Settings className="w-5 h-5"/>} label="System Settings" onClick={() => setActiveTab('settings')} />
           <div className="mt-auto pt-4 border-t border-white/5">
@@ -212,6 +214,7 @@ export const AdminDashboard: React.FC = () => {
                 <SidebarLink active={activeTab === 'plans'} icon={<ReceiptText className="w-5 h-5"/>} label="Plans" onClick={() => { setActiveTab('plans'); setIsSidebarOpen(false); }} />
                 <SidebarLink active={activeTab === 'deposits'} icon={<ArrowDownLeft className="w-5 h-5"/>} label="Deposits" onClick={() => { setActiveTab('deposits'); setIsSidebarOpen(false); }} />
                 <SidebarLink active={activeTab === 'withdrawals'} icon={<ArrowUpRight className="w-5 h-5"/>} label="Withdrawals" onClick={() => { setActiveTab('withdrawals'); setIsSidebarOpen(false); }} />
+                <SidebarLink active={activeTab === 'loans'} icon={<Wallet className="w-5 h-5"/>} label="Loan Applications" onClick={() => { setActiveTab('loans'); setIsSidebarOpen(false); }} />
                 <SidebarLink active={activeTab === 'chats'} icon={<MessageSquare className="w-5 h-5"/>} label="Live Chats" onClick={() => { setActiveTab('chats'); setIsSidebarOpen(false); }} />
                 <SidebarLink active={activeTab === 'settings'} icon={<Settings className="w-5 h-5"/>} label="Settings" onClick={() => { setActiveTab('settings'); setIsSidebarOpen(false); }} />
                 
@@ -258,6 +261,7 @@ export const AdminDashboard: React.FC = () => {
         {activeTab === 'plans' && <AdminPlans />}
         {activeTab === 'deposits' && <AdminDeposits />}
         {activeTab === 'withdrawals' && <AdminWithdrawals />}
+        {activeTab === 'loans' && <AdminLoans />}
         {activeTab === 'settings' && <AdminSettings />}
         {activeTab === 'chats' && <AdminChats />}
       </main>
@@ -890,6 +894,127 @@ const AdminChats = () => {
                         <MessageSquare className="w-20 h-20" />
                         <p className="text-sm font-bold uppercase tracking-[0.3em]">Select a chat to begin support</p>
                     </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+const AdminLoans = () => {
+    const [loans, setLoans] = useState<LoanApplication[]>([]);
+    const [filter, setFilter] = useState('all');
+
+    useEffect(() => {
+        const q = query(collection(db, 'loanApplications'), orderBy('createdAt', 'desc'));
+        return onSnapshot(q, s => setLoans(s.docs.map(d => ({id: d.id, ...d.data()}))), (err) => handleFirestoreError(err, OperationType.LIST, 'loanApplications'));
+    }, []);
+
+    const handleAction = async (id: string, status: string) => {
+        try {
+            await updateDoc(doc(db, 'loanApplications', id), { status });
+        } catch (err: any) {
+            handleFirestoreError(err, OperationType.WRITE, `loanApplications/${id}`);
+        }
+    };
+
+    const filteredLoans = loans.filter(l => filter === 'all' || l.status === filter);
+
+    return (
+        <div className="flex flex-col gap-8">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <h2 className="text-3xl font-black italic uppercase tracking-tighter text-white">Loan Applications</h2>
+                <div className="flex bg-white/5 p-1 rounded-xl border border-white/5 overflow-x-auto max-w-full">
+                    {['all', 'processing', 'pending', 'approved', 'rejected'].map(f => (
+                        <button
+                            key={f}
+                            onClick={() => setFilter(f)}
+                            className={cn(
+                                "px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap",
+                                filter === f ? "bg-brand-primary text-black" : "text-gray-500 hover:text-white"
+                            )}
+                        >
+                            {f}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4">
+                {filteredLoans.length === 0 ? (
+                    <div className="py-20 bg-brand-muted/20 border border-dashed border-white/10 rounded-[32px] flex flex-col items-center justify-center text-center gap-4 opacity-50">
+                        <Wallet className="w-12 h-12" />
+                        <span className="font-bold uppercase tracking-widest text-sm text-slate-500">No applications in this sector</span>
+                    </div>
+                ) : (
+                    filteredLoans.map(l => (
+                        <div key={l.id} className="bg-brand-muted/50 border border-white/5 rounded-[2.5rem] p-6 md:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-8 group hover:bg-white/5 transition-all">
+                            <div className="flex items-center gap-6">
+                                <div className="w-16 h-16 rounded-[1.5rem] bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(37,99,235,0.1)]">
+                                    <UserIcon className="w-8 h-8" />
+                                </div>
+                                <div className="flex flex-col gap-1">
+                                    <h4 className="text-xl font-black text-white italic uppercase tracking-tighter">{l.fullName}</h4>
+                                    <div className="flex flex-wrap items-center gap-3">
+                                        <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest px-2 py-0.5 bg-white/5 rounded-md">{l.phoneNumber}</span>
+                                        <span className="text-[10px] text-brand-primary font-black uppercase tracking-widest">{l.bankName}</span>
+                                    </div>
+                                    <span className="text-[9px] text-gray-500 font-mono mt-1 opacity-60">REF: {l.id}</span>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 flex-1 lg:max-w-2xl px-0 lg:px-8 border-t lg:border-t-0 lg:border-l border-white/5 pt-6 lg:pt-0">
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Requested</span>
+                                    <span className="text-lg font-black text-white">{formatCurrency(l.amountRequested)}</span>
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Monthly</span>
+                                    <span className="text-lg font-black text-slate-400">{formatCurrency(l.monthlyIncome)}</span>
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Timestamp</span>
+                                    <span className="text-xs font-bold text-slate-400">
+                                        {l.createdAt ? format(l.createdAt.toDate?.() || new Date(l.createdAt), 'MMM dd, HH:mm') : '-'}
+                                    </span>
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Integrity</span>
+                                    <span className={cn(
+                                        "text-[9px] font-black uppercase px-3 py-1 rounded-full w-fit",
+                                        l.status === 'processing' ? 'bg-blue-500/10 text-blue-400' :
+                                        l.status === 'approved' ? 'bg-emerald-500/10 text-emerald-400' :
+                                        l.status === 'rejected' ? 'bg-red-500/10 text-red-400' : 'bg-gray-500/10 text-gray-400'
+                                    )}>
+                                        {l.status}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 border-t lg:border-t-0 border-white/5 pt-6 lg:pt-0">
+                                <button
+                                    onClick={() => handleAction(l.id, 'approved')}
+                                    className="flex-1 lg:flex-none p-4 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-black rounded-2xl transition-all flex items-center justify-center"
+                                    title="Approve Injection"
+                                >
+                                    <Check className="w-5 h-5" />
+                                </button>
+                                <button
+                                    onClick={() => handleAction(l.id, 'rejected')}
+                                    className="flex-1 lg:flex-none p-4 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-2xl transition-all flex items-center justify-center"
+                                    title="Reject Cycle"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                                <button
+                                    onClick={() => handleAction(l.id, 'processing')}
+                                    className="flex-1 lg:flex-none p-4 bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white rounded-2xl transition-all flex items-center justify-center"
+                                    title="Set Processing"
+                                >
+                                    <Settings className="w-5 h-5" />
+                                </button>
+                            </div>
+                        </div>
+                    ))
                 )}
             </div>
         </div>

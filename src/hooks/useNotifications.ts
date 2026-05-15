@@ -74,7 +74,7 @@ export const useNotifications = () => {
           icon: '/logo.png',
           vibrate: [200, 100, 200],
           tag: 'test-notification'
-        });
+        } as any);
       } else {
         const notification = new Notification('Test Notification', {
           body: 'If you see this, notifications are working correctly on your browser!',

@@ -6,49 +6,59 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore, collection, query, where, getDocs, writeBatch, doc, increment, Timestamp } from "firebase/firestore";
 import firebaseConfig from "./firebase-applet-config.json" with { type: "json" };
 
+import admin from "firebase-admin";
+import { getFirestore as getAdminFirestore } from "firebase-admin/firestore";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Initialize Firebase for the server worker
+// Initialize Firebase Client for Vite middleware tracking (if needed) or just use Admin for everything server-side
 const firebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-const db = getFirestore(firebaseApp);
+
+// Initialize Firebase Admin
+if (admin.apps.length === 0) {
+  admin.initializeApp({
+    projectId: firebaseConfig.projectId,
+  });
+}
+
+// Get Admin Firestore with correct database ID
+const adminDb = getAdminFirestore(admin.app(), (firebaseConfig as any).firestoreDatabaseId || '(default)');
 
 async function startServer() {
   const app = express();
   const PORT = 3000;
 
   // Background Worker: Maturation Logic
-  // This runs every 60 seconds to credit profits even if users are offline
+  // Using Admin SDK to bypass security rules
   setInterval(async () => {
     try {
-      const now = Timestamp.now();
-      const q = query(
-        collection(db, "investments"),
-        where("status", "==", "running"),
-        where("endsAt", "<=", now)
-      );
+      const now = admin.firestore.Timestamp.now();
+      const snapshot = await adminDb.collection("investments")
+        .where("status", "==", "running")
+        .where("endsAt", "<=", now)
+        .get();
 
-      const snapshot = await getDocs(q);
       if (snapshot.empty) return;
 
       console.log(`[Worker] Found ${snapshot.size} matured investments. Processing...`);
 
-      const batch = writeBatch(db);
+      const batch = adminDb.batch();
       
       for (const investmentDoc of snapshot.docs) {
         const inv = investmentDoc.data();
         const invId = investmentDoc.id;
 
         // 1. Mark as completed
-        batch.update(doc(db, "investments", invId), {
+        batch.update(adminDb.collection("investments").doc(invId), {
           status: "completed",
           processedAt: now
         });
 
         // 2. Credit User
-        batch.update(doc(db, "users", inv.userId), {
-          balance: increment(inv.totalReturn || 0),
-          totalEarnings: increment(inv.profit || 0)
+        batch.update(adminDb.collection("users").doc(inv.userId), {
+          balance: admin.firestore.FieldValue.increment(inv.totalReturn || 0),
+          totalEarnings: admin.firestore.FieldValue.increment(inv.profit || 0)
         });
       }
 

@@ -20,6 +20,9 @@ import { ReferralPage } from './pages/ReferralPage';
 import { HistoryPage } from './pages/HistoryPage';
 import { ChatPage } from './pages/ChatPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { LoansPage } from './pages/LoansPage';
+import { LoanApplicationPage } from './pages/LoanApplicationPage';
+import { LoanProcessingPage } from './pages/LoanProcessingPage';
 import { AdminLogin } from './pages/AdminLogin';
 import { AdminDashboard } from './pages/AdminDashboard';
 
@@ -51,6 +54,10 @@ export default function App() {
             <Route path="/history" element={<ProtectedRoute><HistoryPage /></ProtectedRoute>} />
             <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+            
+            <Route path="/loans" element={<ProtectedRoute><LoansPage /></ProtectedRoute>} />
+            <Route path="/loans/apply/:amount" element={<ProtectedRoute><LoanApplicationPage /></ProtectedRoute>} />
+            <Route path="/loans/processing/:applicationId" element={<ProtectedRoute><LoanProcessingPage /></ProtectedRoute>} />
           </Route>
 
           {/* Admin Routes */}

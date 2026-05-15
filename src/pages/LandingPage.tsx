@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ShieldCheck, TrendingUp, Users, CheckCircle2, ChevronRight } from 'lucide-react';
+import { ShieldCheck, TrendingUp, Users, CheckCircle2, ChevronRight, Banknote } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { formatCurrency, cn } from '../lib/utils';
 import { useAuth } from '../contexts/AuthContext';
@@ -71,6 +71,15 @@ export const LandingPage: React.FC = () => {
               Start Earning Now
               <ChevronRight className="w-5 h-5" />
             </Link>
+            <div className="mt-4 flex flex-col items-center justify-center gap-2 text-center">
+              <div className="flex items-center gap-2 text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em] opacity-80">
+                <Banknote className="w-4 h-4" />
+                <span>Zero Capital? No Problem.</span>
+              </div>
+              <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest leading-relaxed max-w-[280px]">
+                We now offer instant loans specifically for members who want to start their investment journey but lack immediate capital.
+              </p>
+            </div>
           </div>
         </motion.div>
       </section>
