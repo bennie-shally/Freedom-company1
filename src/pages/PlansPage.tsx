@@ -17,8 +17,7 @@ import { handleFirestoreError, OperationType } from '../lib/errorHandlers';
 export const PlansPage: React.FC = () => {
   const { userData, user } = useAuth();
   const [plans, setPlans] = useState<InvestmentPlan[]>([]);
-  const [investAmount, setInvestAmount] = useState<number>(0);
-  const [selectedPlan, setSelectedPlan] = useState<InvestmentPlan | null>(null);
+  const [amounts, setAmounts] = useState<{ [key: string]: number }>({});
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -28,7 +27,7 @@ export const PlansPage: React.FC = () => {
       try {
           const snap = await getDocs(collection(db, 'investment_plans'));
           if (!snap.empty) {
-            setPlans(snap.docs.map(doc => {
+            const fetchedPlans = snap.docs.map(doc => {
               const data = doc.data();
               return { 
                 id: doc.id, 
@@ -36,7 +35,15 @@ export const PlansPage: React.FC = () => {
                 // Ensure compatibility with different property names
                 profitAmount: data.profitAmount || (data.minAmount * (data.profitPercent || 0) / 100) || 0 
               } as InvestmentPlan;
-            }));
+            });
+            setPlans(fetchedPlans);
+            
+            // Initialize default amounts
+            const initialAmounts: { [key: string]: number } = {};
+            fetchedPlans.forEach(p => {
+              initialAmounts[p.id] = p.minAmount;
+            });
+            setAmounts(initialAmounts);
           } else {
             setPlans([]); // Ensure empty array if no plans found
           }
@@ -49,17 +56,31 @@ export const PlansPage: React.FC = () => {
 
   const handleInvest = async (plan: InvestmentPlan) => {
     if (!userData || !user) return;
+    
+    const amount = amounts[plan.id] || plan.minAmount;
 
-    if (userData.balance < plan.minAmount) {
-      alert(`Insufficient balance. Minimum investment for this plan is ${formatCurrency(plan.minAmount)}.`);
+    if (amount < plan.minAmount) {
+      alert(`Minimum investment for this plan is ${formatCurrency(plan.minAmount)}.`);
+      return;
+    }
+
+    if (amount > plan.maxAmount) {
+      alert(`Maximum investment for this plan is ${formatCurrency(plan.maxAmount)}.`);
+      return;
+    }
+
+    if (userData.balance < amount) {
+      alert(`Insufficient balance. Your balance is ${formatCurrency(userData.balance)}.`);
       navigate('/deposit');
       return;
     }
 
     setLoading(true);
     try {
-      const amount = plan.minAmount;
-      const profit = plan.profitAmount || 0;
+      // PROPORTIONAL PROFIT CALCULATION
+      // (amount / plan.minAmount) * plan.profitAmount
+      const ratio = amount / plan.minAmount;
+      const profit = Math.floor((plan.profitAmount || 0) * ratio);
       const totalReturn = amount + profit;
       const startedAt = new Date();
       
@@ -131,21 +152,42 @@ export const PlansPage: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] text-blue-500 font-bold uppercase tracking-widest">Total Profit</span>
+                  <span className="text-[10px] text-blue-500 font-bold uppercase tracking-widest leading-none mb-1">Estimated Profit</span>
                   <div className="text-4xl font-black text-blue-500 tracking-tighter">
-                    +{formatCurrency(plan.profitAmount || 0)}
+                    +{formatCurrency(Math.floor(((amounts[plan.id] || plan.minAmount) / plan.minAmount) * (plan.profitAmount || 0)))}
                   </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pb-4 border-b border-white/5">
+              <div className="grid grid-cols-2 gap-4 pb-4">
                 <div className="flex flex-col gap-1">
                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Profit Time</span>
                    <span className="text-lg font-black text-white">{plan.durationHours || plan.durationDays * 24} Hours</span>
                 </div>
                 <div className="flex flex-col gap-1">
-                   <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Min Deposit</span>
-                   <span className="text-lg font-black text-white">{formatCurrency(plan.minAmount)}</span>
+                   <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Range</span>
+                   <span className="text-lg font-black text-white">{formatCurrency(plan.minAmount)} - {formatCurrency(plan.maxAmount)}</span>
+                </div>
+              </div>
+
+              {/* Amount Input */}
+              <div className="bg-white/5 border border-white/5 rounded-2xl p-4 flex flex-col gap-2">
+                <div className="flex justify-between items-center">
+                   <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Enter Amount</span>
+                   <span className="text-[10px] font-black text-white/50 uppercase tracking-widest italic">Balance: {formatCurrency(userData?.balance || 0)}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                   <div className="text-xl font-black text-white/30">₱</div>
+                   <input 
+                    type="number"
+                    value={amounts[plan.id] || ''}
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      setAmounts({ ...amounts, [plan.id]: val });
+                    }}
+                    placeholder={`Min: ${plan.minAmount}`}
+                    className="flex-1 bg-transparent border-none outline-none text-2xl font-black text-white tracking-tighter placeholder:text-white/10"
+                   />
                 </div>
               </div>
 

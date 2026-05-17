@@ -424,7 +424,7 @@ const AdminPlans = () => {
                                     <span className="font-mono text-sm">{p.durationHours || p.durationDays} Hours</span>
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="text-[9px] text-brand-primary uppercase font-bold">Returns (Profit)</span>
+                                    <span className="text-[9px] text-brand-primary uppercase font-bold">Base Profit</span>
                                     <span className="font-black text-xl text-brand-primary">{formatCurrency(p.profitAmount || 0)}</span>
                                 </div>
                             </div>
@@ -456,7 +456,10 @@ const AdminPlans = () => {
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
-                                    <SettingsInput label="Total Profit (PHP)" type="number" value={(formData.profitAmount ?? '').toString()} onChange={v => setFormData({...formData, profitAmount: Number(v)})} />
+                                    <div className="flex flex-col gap-2">
+                                        <SettingsInput label="Profit at Min (PHP)" type="number" value={(formData.profitAmount ?? '').toString()} onChange={v => setFormData({...formData, profitAmount: Number(v)})} />
+                                        <p className="text-[8px] text-gray-500 uppercase font-bold leading-tight">Income scales proportionally with investment</p>
+                                    </div>
                                     <SettingsInput label="Duration (Hours)" type="number" value={(formData.durationHours ?? '').toString()} onChange={v => setFormData({...formData, durationHours: Number(v)})} />
                                 </div>
 
