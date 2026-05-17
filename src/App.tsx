@@ -21,6 +21,7 @@ import { HistoryPage } from './pages/HistoryPage';
 import { ChatPage } from './pages/ChatPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { LoansPage } from './pages/LoansPage';
+import { LoanInfoPage } from './pages/LoanInfoPage';
 import { LoanApplicationPage } from './pages/LoanApplicationPage';
 import { LoanProcessingPage } from './pages/LoanProcessingPage';
 import { AdminLogin } from './pages/AdminLogin';
@@ -42,6 +43,7 @@ export default function App() {
         <Routes>
           <Route element={<Layout />}>
             <Route path="/landing" element={<LandingPage />} />
+            <Route path="/loan-info" element={<LoanInfoPage />} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />

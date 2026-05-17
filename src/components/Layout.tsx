@@ -12,7 +12,7 @@ import { FloatingSupport } from './FloatingSupport';
 
 export const Layout: React.FC = () => {
   const location = useLocation();
-  const hideNav = ['/login', '/register', '/admin/login', '/landing', '/chat'].includes(location.pathname);
+  const hideNav = ['/login', '/register', '/admin/login', '/landing', '/chat', '/loan-info'].includes(location.pathname);
   const isAdminPage = location.pathname.startsWith('/admin');
 
   return (

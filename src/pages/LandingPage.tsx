@@ -126,12 +126,12 @@ export const LandingPage: React.FC = () => {
               </div>
               <div className="flex flex-col">
                 <span className="text-[8px] font-black text-white/50 uppercase tracking-widest">Max Loan</span>
-                <span className="text-white font-black">₱100,000.00</span>
+                <span className="text-white font-black">₱1,000,000.00</span>
               </div>
             </div>
 
             <Link 
-              to="/loans"
+              to="/loan-info"
               className="inline-flex items-center gap-3 px-8 py-4 bg-white text-blue-900 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-50 transition-all active:scale-95"
             >
               Learn More About Loans

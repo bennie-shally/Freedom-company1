@@ -53,7 +53,28 @@ export const Dashboard: React.FC = () => {
   const [activeInvestments, setActiveInvestments] = useState<Investment[]>([]);
   const [recentHistory, setRecentHistory] = useState<any[]>([]);
   const [activePayouts, setActivePayouts] = useState(PAYOUT_POOL.slice(0, 5));
+  const [activeUsersCount, setActiveUsersCount] = useState(Math.floor(Math.random() * (700 - 100 + 1) + 100));
   const navigate = useNavigate();
+
+  // Fake active users counter
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveUsersCount(prev => {
+        const rand = Math.random();
+        // 85% chance to stay in 100-700 range (more constant traffic as requested)
+        if (prev > 700 || rand < 0.85) {
+          const change = Math.floor(Math.random() * 31) - 15; // -15 to +15 fluctuation
+          let next = prev + change;
+          if (next < 100) next = 100 + Math.floor(Math.random() * 50);
+          if (next > 700) next = 650 + Math.floor(Math.random() * 50);
+          return next;
+        } 
+        // 15% chance to spike high up to 3000
+        return Math.floor(Math.random() * (3000 - 701 + 1) + 701);
+      });
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Rotate payouts every 3 seconds
   useEffect(() => {
@@ -146,9 +167,12 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
           <div className="flex flex-col items-end">
-            <div className="flex items-center gap-1.5 px-2 py-0.5 sm:px-3 sm:py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20">
+            <div className="flex items-center gap-1.5 px-2 py-0.5 sm:px-3 sm:py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
               <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[8px] sm:text-[9px] font-black text-emerald-500 uppercase tracking-widest leading-none">ACTIVE</span>
+              <span className="text-[8px] sm:text-[9px] font-black text-emerald-500 uppercase tracking-widest leading-none">
+                <span className="text-white/80 mr-1 opacity-70 italic font-bold">{activeUsersCount.toLocaleString()}</span>
+                ACTIVE
+              </span>
             </div>
             <span className="text-[7px] sm:text-[8px] font-bold text-slate-700 mt-1 uppercase tracking-widest">v4.2</span>
           </div>

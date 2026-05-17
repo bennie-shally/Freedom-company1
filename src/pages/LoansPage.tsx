@@ -40,6 +40,18 @@ const loanPlans = [
     duration: '48-60 Months',
     features: ['Maximum Expansion', 'VIP Processing', 'Legacy Support']
   },
+  { 
+    amount: 500000, 
+    interest: '4.5%', 
+    duration: '60-72 Months',
+    features: ['Diamond Processing', 'Unlimited Expansion', 'Global Priority']
+  },
+  { 
+    amount: 1000000, 
+    interest: '5.0%', 
+    duration: '72-84 Months',
+    features: ['Maximum Corporate Cap', 'Government Protected', 'Freedom Master Tier']
+  },
 ];
 
 export const LoansPage: React.FC = () => {
