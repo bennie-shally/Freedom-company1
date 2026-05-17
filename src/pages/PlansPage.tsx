@@ -157,24 +157,24 @@ export const PlansPage: React.FC = () => {
             </div>
 
             {/* Profit & Stats */}
-            <div className="flex justify-between items-center py-4 border-y border-white/5">
-              <div className="flex flex-col">
-                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Potential ROI</span>
-                <div className="text-3xl font-black text-white tracking-tighter leading-none">
-                  +{formatCurrency(Math.floor(((amounts[plan.id] || plan.minAmount) / plan.minAmount) * (plan.profitAmount || 0)))}
+            <div className="flex justify-between items-center py-5 border-y border-white/5">
+              <div className="flex flex-col gap-1">
+                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest leading-none">Potential ROI</span>
+                <div className="text-2xl sm:text-3xl font-black text-white tracking-tighter leading-none whitespace-nowrap">
+                  <span className="text-blue-500 mr-0.5">+</span>{formatCurrency(Math.floor(((amounts[plan.id] || plan.minAmount) / plan.minAmount) * (plan.profitAmount || 0)))}
                 </div>
               </div>
-              <div className="text-right">
-                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Limit</span>
-                <div className="text-xs font-black text-white/70 uppercase">Max {formatCurrency(plan.maxAmount)}</div>
+              <div className="text-right flex flex-col gap-1">
+                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest leading-none">Policy Limit</span>
+                <div className="text-xs font-black text-white/70 uppercase tracking-tight">Max {formatCurrency(plan.maxAmount)}</div>
               </div>
             </div>
 
             {/* Amount Input Section */}
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div className="relative group/input">
-                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                  <span className="text-lg font-black text-blue-500">₱</span>
+                <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+                  <span className="text-xl font-black text-blue-500 shadow-blue-500/20">₱</span>
                 </div>
                 <input 
                   type="number"
@@ -183,21 +183,21 @@ export const PlansPage: React.FC = () => {
                     const val = Number(e.target.value);
                     setAmounts({ ...amounts, [plan.id]: val });
                   }}
-                  placeholder={`Min: ${plan.minAmount}`}
-                  className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 pl-10 pr-4 text-xl font-black text-white outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all placeholder:text-white/10"
+                  placeholder={`Min Amount: ${plan.minAmount}`}
+                  className="w-full bg-white/5 border border-white/5 rounded-[1.25rem] py-5 pl-12 pr-5 text-2xl font-black text-white outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all placeholder:text-white/5"
                 />
-                <div className="flex justify-between items-center mt-2 px-1">
+                <div className="flex justify-between items-center mt-3 px-2">
                   <button 
                     onClick={() => setAmounts({...amounts, [plan.id]: plan.minAmount})}
-                    className="text-[8px] font-black text-slate-500 uppercase tracking-widest hover:text-white transition-colors"
+                    className="text-[9px] font-black text-slate-400 uppercase tracking-widest hover:text-white transition-colors py-1 underline underline-offset-4 decoration-blue-500/30"
                   >
                     Set Minimum
                   </button>
                   <button 
                     onClick={() => setAmounts({...amounts, [plan.id]: Math.min(userData?.balance || 0, plan.maxAmount)})}
-                    className="text-[8px] font-black text-slate-500 uppercase tracking-widest hover:text-white transition-colors"
+                    className="text-[9px] font-black text-slate-400 uppercase tracking-widest hover:text-white transition-colors py-1 underline underline-offset-4 decoration-blue-500/30"
                   >
-                    Set Max Available
+                    Max Available
                   </button>
                 </div>
               </div>
@@ -205,10 +205,10 @@ export const PlansPage: React.FC = () => {
               <button
                 onClick={() => handleInvest(plan)}
                 disabled={loading}
-                className="w-full py-5 bg-white text-black rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-[0_10px_30px_-10px_rgba(255,255,255,0.2)] active:scale-95 transition-all flex items-center justify-center gap-2 hover:bg-slate-100 disabled:opacity-50"
+                className="w-full py-6 bg-white text-black rounded-[1.25rem] font-black uppercase tracking-[0.25em] text-[11px] shadow-[0_15px_40px_-15px_rgba(255,255,255,0.3)] active:scale-95 transition-all flex items-center justify-center gap-3 hover:bg-white/90 disabled:opacity-50"
               >
                 Capitalize Plan
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-5 h-5" />
               </button>
             </div>
 
