@@ -34,7 +34,7 @@ export const PlansPage: React.FC = () => {
                 id: doc.id, 
                 ...data,
                 // Ensure compatibility with different property names
-                profitPercent: data.profitPercent || data.returnPercent || 0 
+                profitAmount: data.profitAmount || (data.minAmount * (data.profitPercent || 0) / 100) || 0 
               } as InvestmentPlan;
             }));
           } else {
@@ -59,8 +59,7 @@ export const PlansPage: React.FC = () => {
     setLoading(true);
     try {
       const amount = plan.minAmount;
-      const profitPercent = plan.profitPercent || 0;
-      const profit = Math.floor((amount * profitPercent) / 100);
+      const profit = plan.profitAmount || 0;
       const totalReturn = amount + profit;
       const startedAt = new Date();
       
@@ -131,8 +130,11 @@ export const PlansPage: React.FC = () => {
                     Secure Investment
                   </div>
                 </div>
-                <div className="text-4xl font-black text-blue-500 tracking-tighter">
-                  {plan.profitPercent || 0}%
+                <div className="flex flex-col">
+                  <span className="text-[10px] text-blue-500 font-bold uppercase tracking-widest">Total Profit</span>
+                  <div className="text-4xl font-black text-blue-500 tracking-tighter">
+                    +{formatCurrency(plan.profitAmount || 0)}
+                  </div>
                 </div>
               </div>
 

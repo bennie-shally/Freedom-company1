@@ -309,7 +309,7 @@ const AdminPlans = () => {
     const [editingPlan, setEditingPlan] = useState<any>(null);
     const [formData, setFormData] = useState({
       name: '', minAmount: 300, maxAmount: 5000, 
-      profitPercent: 50, durationHours: 8, description: ''
+      profitAmount: 100, durationHours: 8, description: ''
     });
 
     useEffect(() => {
@@ -322,7 +322,7 @@ const AdminPlans = () => {
         try {
             const dataToSave = {
               ...formData,
-              returnPercent: formData.profitPercent // Sync for rules
+              // profitAmount is the new primary field
             };
             if (editingPlan) {
                 await updateDoc(doc(db, 'investment_plans', editingPlan.id), dataToSave);
@@ -331,7 +331,7 @@ const AdminPlans = () => {
             }
             setIsAdding(false);
             setEditingPlan(null);
-            setFormData({ name: '', minAmount: 300, maxAmount: 5000, profitPercent: 50, durationHours: 8, description: '' });
+            setFormData({ name: '', minAmount: 300, maxAmount: 5000, profitAmount: 100, durationHours: 8, description: '' });
         } catch (err: any) {
             handleFirestoreError(err, OperationType.WRITE, 'investment_plans');
         }
@@ -390,7 +390,7 @@ const AdminPlans = () => {
                                                 name: p.name || '',
                                                 minAmount: p.minAmount || 0,
                                                 maxAmount: p.maxAmount || 0,
-                                                profitPercent: p.profitPercent || p.returnPercent || 0,
+                                                profitAmount: p.profitAmount || p.profitPercent || 0,
                                                 durationHours: p.durationHours || 8,
                                                 description: p.description || ''
                                             }); 
@@ -424,8 +424,8 @@ const AdminPlans = () => {
                                     <span className="font-mono text-sm">{p.durationHours || p.durationDays} Hours</span>
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="text-[9px] text-brand-primary uppercase font-bold">Returns</span>
-                                    <span className="font-black text-xl text-brand-primary">{p.profitPercent || p.returnPercent}%</span>
+                                    <span className="text-[9px] text-brand-primary uppercase font-bold">Returns (Profit)</span>
+                                    <span className="font-black text-xl text-brand-primary">{formatCurrency(p.profitAmount || 0)}</span>
                                 </div>
                             </div>
                         </div>
@@ -456,7 +456,7 @@ const AdminPlans = () => {
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
-                                    <SettingsInput label="Returns (%)" type="number" value={(formData.profitPercent ?? '').toString()} onChange={v => setFormData({...formData, profitPercent: Number(v)})} />
+                                    <SettingsInput label="Total Profit (PHP)" type="number" value={(formData.profitAmount ?? '').toString()} onChange={v => setFormData({...formData, profitAmount: Number(v)})} />
                                     <SettingsInput label="Duration (Hours)" type="number" value={(formData.durationHours ?? '').toString()} onChange={v => setFormData({...formData, durationHours: Number(v)})} />
                                 </div>
 

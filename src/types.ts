@@ -67,7 +67,7 @@ export interface InvestmentPlan {
   name: string;
   minAmount: number;
   maxAmount: number;
-  profitPercent: number;
+  profitAmount: number;
   durationHours?: number;
   durationDays?: number;
 }
