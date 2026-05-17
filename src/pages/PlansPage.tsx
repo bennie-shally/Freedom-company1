@@ -160,7 +160,7 @@ export const PlansPage: React.FC = () => {
             <div className="flex justify-between items-center py-5 border-y border-white/5">
               <div className="flex flex-col gap-1">
                 <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest leading-none">Potential ROI</span>
-                <div className="text-2xl sm:text-3xl font-black text-white tracking-tighter leading-none whitespace-nowrap">
+                <div className="text-xl sm:text-2xl font-black text-white tracking-tighter leading-none whitespace-nowrap">
                   <span className="text-blue-500 mr-0.5">+</span>{formatCurrency(Math.floor(((amounts[plan.id] || plan.minAmount) / plan.minAmount) * (plan.profitAmount || 0)))}
                 </div>
               </div>
@@ -173,8 +173,8 @@ export const PlansPage: React.FC = () => {
             {/* Amount Input Section */}
             <div className="space-y-5">
               <div className="relative group/input">
-                <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
-                  <span className="text-xl font-black text-blue-500 shadow-blue-500/20">₱</span>
+                <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none pb-0.5">
+                  <span className="text-2xl font-black text-blue-500 shadow-blue-500/20">₱</span>
                 </div>
                 <input 
                   type="number"
