@@ -131,75 +131,89 @@ export const PlansPage: React.FC = () => {
         </p>
       </div>
 
-      <div className="flex flex-col gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {plans.map((plan) => (
           <motion.div
             key={plan.id}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="group relative overflow-hidden rounded-[3rem] bg-white/5 border border-white/5 backdrop-blur-xl p-8 transition-all hover:bg-white/10 active:scale-[0.98]"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="group relative overflow-hidden rounded-[2rem] bg-[#121212] border border-white/5 backdrop-blur-xl p-6 transition-all hover:border-blue-500/30 active:scale-[0.99] flex flex-col gap-6"
           >
-            {/* Glow Accent */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 blur-3xl group-hover:bg-blue-500/20 transition-all" />
-
-            <div className="relative z-10 flex flex-col gap-12">
-              <div className="flex flex-col sm:flex-row justify-between items-start gap-6 sm:gap-4">
-                <div className="space-y-4">
-                  <h3 className="text-4xl font-black text-white italic tracking-tighter uppercase leading-none">{plan.name}</h3>
-                  <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/5 rounded-full border border-white/10 text-[9px] font-black uppercase tracking-widest text-slate-400">
-                    <Shield className="w-3.5 h-3.5 text-blue-400" />
-                    Secure Investment
-                  </div>
+            {/* Header: Name & Badge */}
+            <div className="flex justify-between items-start">
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-2xl font-black text-white italic tracking-tighter uppercase leading-none">{plan.name}</h3>
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
                 </div>
-                <div className="flex flex-col gap-2">
-                  <span className="text-[11px] text-blue-500 font-black uppercase tracking-widest leading-none">Estimated Profit</span>
-                  <div className="text-5xl font-black text-blue-500 tracking-tighter leading-none">
-                    +{formatCurrency(Math.floor(((amounts[plan.id] || plan.minAmount) / plan.minAmount) * (plan.profitAmount || 0)))}
-                  </div>
+                <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-blue-500/70">
+                  <Shield className="w-3 h-3" />
+                  Verified Asset
                 </div>
               </div>
+              <div className="bg-blue-500/10 border border-blue-500/20 px-3 py-1 rounded-lg text-blue-400 text-[10px] font-black uppercase tracking-widest">
+                {plan.durationHours || (plan.durationDays ? plan.durationDays * 24 : 8)}H Term
+              </div>
+            </div>
 
-              <div className="grid grid-cols-2 gap-8 pb-6 border-b border-white/5">
-                <div className="flex flex-col gap-2">
-                   <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Profit Time</span>
-                   <span className="text-xl font-black text-white">{plan.durationHours || (plan.durationDays ? plan.durationDays * 24 : 8)} Hours</span>
-                </div>
-                <div className="flex flex-col gap-2">
-                   <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Investment Range</span>
-                   <span className="text-xl font-black text-white">{formatCurrency(plan.minAmount)} - {formatCurrency(plan.maxAmount)}</span>
+            {/* Profit & Stats */}
+            <div className="flex justify-between items-center py-4 border-y border-white/5">
+              <div className="flex flex-col">
+                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Potential ROI</span>
+                <div className="text-3xl font-black text-white tracking-tighter leading-none">
+                  +{formatCurrency(Math.floor(((amounts[plan.id] || plan.minAmount) / plan.minAmount) * (plan.profitAmount || 0)))}
                 </div>
               </div>
+              <div className="text-right">
+                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Limit</span>
+                <div className="text-xs font-black text-white/70 uppercase">Max {formatCurrency(plan.maxAmount)}</div>
+              </div>
+            </div>
 
-              {/* Amount Input */}
-              <div className="bg-white/5 border border-white/5 rounded-3xl p-6 flex flex-col gap-4">
-                <div className="flex justify-between items-center px-1">
-                   <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Enter Investment Amount</span>
-                   <span className="text-[10px] font-black text-white/40 uppercase tracking-widest italic">Balance: {formatCurrency(userData?.balance || 0)}</span>
+            {/* Amount Input Section */}
+            <div className="space-y-4">
+              <div className="relative group/input">
+                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                  <span className="text-lg font-black text-blue-500">₱</span>
                 </div>
-                <div className="flex items-center gap-4 bg-black/20 rounded-2xl p-4 border border-white/5">
-                   <div className="text-2xl font-black text-blue-500">₱</div>
-                   <input 
-                    type="number"
-                    value={amounts[plan.id] || ''}
-                    onChange={(e) => {
-                      const val = Number(e.target.value);
-                      setAmounts({ ...amounts, [plan.id]: val });
-                    }}
-                    placeholder={`Min: ${plan.minAmount}`}
-                    className="flex-1 bg-transparent border-none outline-none text-3xl font-black text-white tracking-tighter placeholder:text-white/10"
-                   />
+                <input 
+                  type="number"
+                  value={amounts[plan.id] || ''}
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    setAmounts({ ...amounts, [plan.id]: val });
+                  }}
+                  placeholder={`Min: ${plan.minAmount}`}
+                  className="w-full bg-white/5 border border-white/5 rounded-2xl py-4 pl-10 pr-4 text-xl font-black text-white outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all placeholder:text-white/10"
+                />
+                <div className="flex justify-between items-center mt-2 px-1">
+                  <button 
+                    onClick={() => setAmounts({...amounts, [plan.id]: plan.minAmount})}
+                    className="text-[8px] font-black text-slate-500 uppercase tracking-widest hover:text-white transition-colors"
+                  >
+                    Set Minimum
+                  </button>
+                  <button 
+                    onClick={() => setAmounts({...amounts, [plan.id]: Math.min(userData?.balance || 0, plan.maxAmount)})}
+                    className="text-[8px] font-black text-slate-500 uppercase tracking-widest hover:text-white transition-colors"
+                  >
+                    Set Max Available
+                  </button>
                 </div>
               </div>
 
               <button
                 onClick={() => handleInvest(plan)}
                 disabled={loading}
-                className="w-full py-6 bg-white text-black rounded-[1.75rem] font-black uppercase tracking-[0.25em] text-[11px] shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                className="w-full py-5 bg-white text-black rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-[0_10px_30px_-10px_rgba(255,255,255,0.2)] active:scale-95 transition-all flex items-center justify-center gap-2 hover:bg-slate-100 disabled:opacity-50"
               >
-                Invest Now
-                <ArrowRight className="w-5 h-5" />
+                Capitalize Plan
+                <ArrowRight className="w-4 h-4" />
               </button>
             </div>
+
+            {/* Background Grain/Effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent pointer-events-none opacity-50" />
           </motion.div>
         ))}
       </div>
