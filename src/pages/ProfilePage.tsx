@@ -55,6 +55,10 @@ export const ProfilePage: React.FC = () => {
       </div>
 
       <div className="grid gap-3">
+        <div className="p-6 bg-white/5 border border-white/5 rounded-[2rem] flex flex-col gap-1 items-center">
+          <span className="text-[8px] font-black uppercase text-blue-500 tracking-[0.4em]">Your Referral Code</span>
+          <span className="text-2xl font-black tracking-[0.2em] text-white select-all">{userData.referralCode}</span>
+        </div>
         <ProfileItem icon={<Settings className="w-5 h-5" />} label="Account Settings" sub="Update your defaults" />
         <ProfileItem icon={<Bell className="w-5 h-5" />} label="Notifications" sub="Manage alerts" />
         <ProfileItem icon={<LogOut className="w-5 h-5" />} label="Logout" sub="Exit your account" onClick={handleLogout} isDanger />

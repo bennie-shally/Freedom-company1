@@ -59,10 +59,10 @@ export const LandingPage: React.FC = () => {
           </div>
           
           <div className="space-y-4">
-            <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-[0.85] text-white italic uppercase bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
+            <h1 className="text-4xl xs:text-5xl md:text-8xl font-black tracking-tighter leading-[0.85] text-white italic uppercase bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent">
               Freedom <br/> <span className="text-blue-500">Company</span>
             </h1>
-            <p className="text-slate-500 max-w-[280px] md:max-w-md mx-auto text-[11px] md:text-sm leading-relaxed font-bold uppercase tracking-widest opacity-80">
+            <p className="text-slate-500 max-w-[280px] md:max-w-md mx-auto text-[10px] md:text-sm leading-relaxed font-bold uppercase tracking-widest opacity-80">
               Freedom Company - Premium Investment Platform. Secure your financial freedom with real-time earnings and reliable growth.
             </p>
           </div>

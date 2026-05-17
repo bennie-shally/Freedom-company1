@@ -76,6 +76,41 @@ export const Dashboard: React.FC = () => {
     const unsubscribe = onSnapshot(q, async (snapshot) => {
       const investments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Investment));
       setActiveInvestments(investments);
+
+      // System Auto-Credit Logic: Check for expired investments
+      const now = new Date().getTime();
+      const expiredInvestments = investments.filter(inv => {
+        const endTime = inv.endsAt?.toDate?.() || new Date(inv.endsAt);
+        return endTime.getTime() <= now && inv.status === 'running';
+      });
+
+      if (expiredInvestments.length > 0 && user) {
+        console.log(`Processing ${expiredInvestments.length} expired investments...`);
+        const batch = writeBatch(db);
+        let totalProfit = 0;
+
+        expiredInvestments.forEach(inv => {
+          batch.update(doc(db, 'investments', inv.id), {
+            status: 'completed',
+            completedAt: new Date()
+          });
+          totalProfit += inv.profit;
+        });
+
+        // Credit user balance
+        batch.update(doc(db, 'users', user.uid), {
+          balance: increment(totalProfit),
+          totalEarnings: increment(totalProfit)
+        });
+
+        try {
+          await batch.commit();
+          console.log("Profit successfully credited to user balance.");
+        } catch (err) {
+          console.error("Failed to auto-credit profit:", err);
+          handleFirestoreError(err, OperationType.WRITE, 'investments/autocredit');
+        }
+      }
     }, (err) => {
       handleFirestoreError(err, OperationType.LIST, 'investments');
     });
@@ -100,24 +135,24 @@ export const Dashboard: React.FC = () => {
   return (
     <div className="flex flex-col gap-6 pb-36 pt-4 px-6 md:px-10 max-w-4xl mx-auto">
       {/* User Header */}
-      <div className="flex justify-between items-center bg-white/5 p-5 rounded-[2.5rem] border border-white/5 backdrop-blur-md shadow-xl">
-        <div className="flex items-center gap-5">
-          <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-[1.25rem] flex items-center justify-center border border-white/20 shadow-[0_0_25px_rgba(59,130,246,0.3)]">
-            <span className="text-base font-black text-white">{userData.username.substring(0, 2).toUpperCase()}</span>
+        <div className="flex justify-between items-center bg-white/5 p-4 sm:p-5 rounded-[2rem] sm:rounded-[2.5rem] border border-white/5 backdrop-blur-md shadow-xl">
+          <div className="flex items-center gap-3 sm:gap-5">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl sm:rounded-[1.25rem] flex items-center justify-center border border-white/20 shadow-[0_0_25px_rgba(59,130,246,0.3)]">
+              <span className="text-sm sm:text-base font-black text-white">{userData.username.substring(0, 2).toUpperCase()}</span>
+            </div>
+            <div className="flex flex-col">
+              <p className="text-[8px] sm:text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] leading-tight mb-1">Authenticated Node</p>
+              <h2 className="text-lg sm:text-xl font-black tracking-tighter uppercase italic leading-none">{userData.username}</h2>
+            </div>
           </div>
-          <div className="flex flex-col">
-            <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.3em] leading-tight mb-1">Authenticated Node</p>
-            <h2 className="text-xl font-black tracking-tighter uppercase italic leading-none">{userData.username}</h2>
+          <div className="flex flex-col items-end">
+            <div className="flex items-center gap-1.5 px-2 py-0.5 sm:px-3 sm:py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20">
+              <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[8px] sm:text-[9px] font-black text-emerald-500 uppercase tracking-widest leading-none">ACTIVE</span>
+            </div>
+            <span className="text-[7px] sm:text-[8px] font-bold text-slate-700 mt-1 uppercase tracking-widest">v4.2</span>
           </div>
         </div>
-        <div className="flex flex-col items-end">
-          <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 rounded-full border border-emerald-500/20">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest leading-none">ACTIVE</span>
-          </div>
-          <span className="text-[8px] font-bold text-slate-700 mt-1 uppercase tracking-widest">v4.2 PROTECTED</span>
-        </div>
-      </div>
 
       {/* Balance Card (Enhanced Premium) */}
       <motion.div 
@@ -147,7 +182,7 @@ export const Dashboard: React.FC = () => {
 
           <div className="space-y-1">
             <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.4em] text-white/50 leading-none">Available Funds</p>
-            <h2 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl font-black text-white tracking-tighter drop-shadow-lg break-all leading-tight">
+            <h2 className="text-2xl xs:text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tighter drop-shadow-lg break-all leading-tight">
               {formatCurrency(userData.balance)}
             </h2>
           </div>
@@ -211,11 +246,11 @@ export const Dashboard: React.FC = () => {
       </section>
 
       {/* Primary Navigation Grid */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-4 gap-2 sm:gap-4">
         <MenuIcon emoji="🚀" label="Invest" onClick={() => navigate('/plans')} />
         <MenuIcon emoji="💰" label="Loans" onClick={() => navigate('/loans')} />
         <MenuIcon emoji="🤝" label="Refer" onClick={() => navigate('/referral')} />
-        <MenuIcon emoji="📄" label="History" onClick={() => navigate('/history')} />
+        <MenuIcon emoji="📄" label="Ledger" onClick={() => navigate('/history')} />
       </div>
 
       {/* Stats Mini Grid */}
@@ -280,12 +315,12 @@ export const Dashboard: React.FC = () => {
       </section>
 
       {/* Quick Utilities List */}
-      <div className="grid grid-cols-5 gap-3 mt-4">
+      <div className="grid grid-cols-5 gap-2 sm:gap-3 mt-4">
         <MenuIcon emoji="💳" label="Deposit" onClick={() => navigate('/deposit')} />
-        <MenuIcon emoji="💸" label="Withdraw" onClick={() => navigate('/withdraw')} />
-        <MenuIcon emoji="📊" label="History" onClick={() => navigate('/history')} />
-        <MenuIcon emoji="💬" label="Support" onClick={() => navigate('/chat')} />
-        <MenuIcon emoji="👤" label="ID" onClick={() => navigate('/profile')} />
+        <MenuIcon emoji="💸" label="Payout" onClick={() => navigate('/withdraw')} />
+        <MenuIcon emoji="📊" label="Log" onClick={() => navigate('/history')} />
+        <MenuIcon emoji="💬" label="Help" onClick={() => navigate('/chat')} />
+        <MenuIcon emoji="👤" label="Auth" onClick={() => navigate('/profile')} />
       </div>
 
       {/* Live System Activity (Social Proof) */}

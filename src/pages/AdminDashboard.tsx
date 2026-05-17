@@ -204,53 +204,55 @@ export const AdminDashboard: React.FC = () => {
         {isSidebarOpen && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsSidebarOpen(false)} className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 lg:hidden" />
-            <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} className="fixed top-0 left-0 bottom-0 w-72 bg-brand-muted z-[60] p-8 flex flex-col gap-10 shadow-2xl lg:hidden">
-              <div className="flex justify-between items-center">
+            <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} className="fixed top-0 left-0 bottom-0 w-72 bg-brand-muted z-[60] p-7 flex flex-col gap-6 shadow-2xl lg:hidden">
+              <div className="flex justify-between items-center shrink-0">
                 <Logo />
                 <button onClick={() => setIsSidebarOpen(false)}><X className="w-6 h-6"/></button>
               </div>
-              <nav className="flex flex-col gap-1 mt-2 overflow-y-auto max-h-[calc(100vh-200px)] pr-2 scrollbar-hide">
+              <nav className="flex flex-col gap-1 mt-2 overflow-y-auto flex-1 pr-1 scrollbar-hide">
                 <SidebarLink active={activeTab === 'overview'} icon={<BarChart3 className="w-5 h-5"/>} label="Overview" onClick={() => { setActiveTab('overview'); setIsSidebarOpen(false); }} />
                 <SidebarLink active={activeTab === 'users'} icon={<Users className="w-5 h-5"/>} label="Users" onClick={() => { setActiveTab('users'); setIsSidebarOpen(false); }} />
                 <SidebarLink active={activeTab === 'plans'} icon={<ReceiptText className="w-5 h-5"/>} label="Plans" onClick={() => { setActiveTab('plans'); setIsSidebarOpen(false); }} />
                 <SidebarLink active={activeTab === 'deposits'} icon={<ArrowDownLeft className="w-5 h-5"/>} label="Deposits" onClick={() => { setActiveTab('deposits'); setIsSidebarOpen(false); }} />
                 <SidebarLink active={activeTab === 'withdrawals'} icon={<ArrowUpRight className="w-5 h-5"/>} label="Withdrawals" onClick={() => { setActiveTab('withdrawals'); setIsSidebarOpen(false); }} />
-                <SidebarLink active={activeTab === 'loans'} icon={<Wallet className="w-5 h-5"/>} label="Loan Applications" onClick={() => { setActiveTab('loans'); setIsSidebarOpen(false); }} />
+                <SidebarLink active={activeTab === 'loans'} icon={<Wallet className="w-5 h-5"/>} label="Loans" onClick={() => { setActiveTab('loans'); setIsSidebarOpen(false); }} />
                 <SidebarLink active={activeTab === 'chats'} icon={<MessageSquare className="w-5 h-5"/>} label="Live Chats" onClick={() => { setActiveTab('chats'); setIsSidebarOpen(false); }} />
                 <SidebarLink active={activeTab === 'settings'} icon={<Settings className="w-5 h-5"/>} label="Settings" onClick={() => { setActiveTab('settings'); setIsSidebarOpen(false); }} />
                 <SidebarLink active={activeTab === 'maintenance'} icon={<Trash2 className="w-5 h-5"/>} label="Maintenance" onClick={() => { setActiveTab('maintenance'); setIsSidebarOpen(false); }} />
                 
                 {/* Mobile Notification Button */}
-                <div className="mt-4">
+                <div className="mt-4 shrink-0 px-1">
                   {notificationPermission !== 'granted' ? (
                     <button 
                       onClick={requestPermission}
                       className="w-full flex items-center justify-center gap-3 p-4 bg-orange-400 text-black rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-orange-300 transition-all animate-pulse shadow-lg"
                     >
-                      <Bell className="w-4 h-4" /> Enable Notifications
+                      <Bell className="w-4 h-4" /> Enable Notification
                     </button>
                   ) : (
                     <button 
                       onClick={showTestNotification}
                       className="w-full flex items-center justify-center gap-3 p-4 bg-emerald-400/10 text-emerald-400 border border-emerald-400/20 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-emerald-400/20 transition-all"
                     >
-                      <Bell className="w-4 h-4" /> Test Notification
+                      <Bell className="w-4 h-4" /> Test Ping
                     </button>
                   )}
                 </div>
+              </nav>
 
+              <div className="mt-auto pt-4 border-t border-white/5 shrink-0">
                 <button 
                   onClick={async () => {
                     sessionStorage.removeItem('isAdminAuthenticated');
                     await auth.signOut();
                     navigate('/landing');
                   }}
-                  className="flex items-center gap-4 p-4 rounded-2xl text-red-400 hover:bg-red-500/10 transition-all font-bold w-full mt-4 border-t border-white/5"
+                  className="flex items-center gap-4 p-4 rounded-xl text-red-400 bg-red-400/5 hover:bg-red-500/10 transition-all font-bold w-full"
                 >
                   <ArrowLeft className="w-5 h-5" />
                   <span className="text-sm tracking-wide">Secure Exit</span>
                 </button>
-              </nav>
+              </div>
             </motion.div>
           </>
         )}
