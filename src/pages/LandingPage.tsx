@@ -183,6 +183,37 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
+      {/* About Section */}
+      <section className="px-6 mb-4">
+        <div className="bg-white/5 border border-white/5 rounded-[2.5rem] p-8 md:p-12 backdrop-blur-xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 blur-[100px] pointer-events-none" />
+          <div className="relative z-10 space-y-6">
+            <div className="flex flex-col gap-2">
+              <span className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em]">Who We Are</span>
+              <h2 className="text-3xl font-black tracking-tighter uppercase italic text-white">About Freedom Company</h2>
+            </div>
+            <div className="space-y-4">
+              <p className="text-[11px] md:text-sm text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
+                Freedom Company is a premier digital investment gateway designed to empower individuals in the Philippines and beyond. We believe that financial growth should be accessible to everyone, regardless of their starting capital. 
+              </p>
+              <p className="text-[11px] md:text-sm text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
+                By bridging the gap between traditional finance and modern digital assets, we provide a secure, high-uptime network where your wealth grows through smart, automated investment plans. Our mission is to provide the tools and capital necessary for every citizen to achieve true financial independence.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-6 pt-6 border-t border-white/5">
+              <div className="space-y-1">
+                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Our Vision</span>
+                <p className="text-[10px] text-white font-black uppercase italic">Top Investment Choice 2024</p>
+              </div>
+              <div className="space-y-1">
+                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Our Promise</span>
+                <p className="text-[10px] text-white font-black uppercase italic">Legit & Government Verified</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Stats */}
       <section className="px-6 grid grid-cols-2 gap-4">
         <StatCard label="Total Payouts" value="₱24.5M+" />

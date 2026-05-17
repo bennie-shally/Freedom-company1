@@ -109,6 +109,7 @@ service cloud.firestore {
         incoming().totalEarnings == existing().get('totalEarnings', 0) + get(/databases/$(database)/documents/settings/global).data.referralBonus &&
         getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.referredByUid == userId
       );
+      allow delete: if isAdmin();
     }
 
     // Investments
@@ -120,6 +121,7 @@ service cloud.firestore {
         isSignedIn() && resource.data.userId == request.auth.uid &&
         incoming().diff(existing()).affectedKeys().hasOnly(['status'])
       );
+      allow delete: if isAdmin();
     }
 
     // Deposits
@@ -128,6 +130,7 @@ service cloud.firestore {
       allow list: if isSignedIn() && (isAdmin() || (resource.data.userId == request.auth.uid));
       allow create: if isSignedIn() && isValidDeposit(incoming());
       allow update: if isAdmin();
+      allow delete: if isAdmin();
     }
 
     // Withdrawals
@@ -136,6 +139,7 @@ service cloud.firestore {
       allow list: if isSignedIn() && (isAdmin() || (resource.data.userId == request.auth.uid));
       allow create: if isSignedIn() && isValidWithdrawal(incoming());
       allow update: if isAdmin();
+      allow delete: if isAdmin();
     }
 
     function whereUserId() {
@@ -147,10 +151,12 @@ service cloud.firestore {
       allow read: if isOwner(chatId) || isAdmin();
       allow list: if isAdmin();
       allow create, update: if isOwner(chatId) || isAdmin();
+      allow delete: if isAdmin();
       
       match /messages/{msgId} {
         allow read, list: if isOwner(chatId) || isAdmin();
         allow create: if (isOwner(chatId) && (!('isAdmin' in incoming()) || incoming().isAdmin == false)) || isAdmin();
+        allow delete: if isAdmin();
       }
     }
 
@@ -158,6 +164,7 @@ service cloud.firestore {
     match /settings/global {
       allow read: if isSignedIn();
       allow write: if isAdmin();
+      allow delete: if isAdmin();
     }
 
     // Loan Applications
@@ -166,6 +173,7 @@ service cloud.firestore {
       allow list: if isSignedIn() && (isAdmin() || (resource.data.userId == request.auth.uid));
       allow create: if isSignedIn() && isValidLoanApplication(incoming());
       allow update: if isAdmin();
+      allow delete: if isAdmin();
     }
     
     // Investment Plans (admin configurable)

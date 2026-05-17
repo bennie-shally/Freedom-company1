@@ -1054,6 +1054,7 @@ const AdminMaintenance = () => {
 
         setIsResetting(true);
         try {
+            console.log("Starting full system reset...");
             const collectionsToClear = [
                 'deposits',
                 'withdrawals',
@@ -1064,6 +1065,7 @@ const AdminMaintenance = () => {
 
             // 1. Clear simple collections
             for (const collName of collectionsToClear) {
+                console.log(`Clearing collection: ${collName}`);
                 const snapshot = await getDocs(collection(db, collName));
                 const batchSize = 500;
                 
@@ -1076,31 +1078,53 @@ const AdminMaintenance = () => {
                         // For 'chats', also clear subcollection
                         if (collName === 'chats') {
                             const messagesSnap = await getDocs(collection(db, 'chats', docSnap.id, 'messages'));
-                            const msgBatch = writeBatch(db);
-                            messagesSnap.docs.forEach(m => msgBatch.delete(m.ref));
-                            await msgBatch.commit();
+                            if (!messagesSnap.empty) {
+                                // Chunk message deletions too if needed, though usually messages are within batch limits
+                                const msgBatchSize = 500;
+                                for (let j = 0; j < messagesSnap.docs.length; j += msgBatchSize) {
+                                    const msgBatch = writeBatch(db);
+                                    const msgChunk = messagesSnap.docs.slice(j, j + msgBatchSize);
+                                    msgChunk.forEach(m => msgBatch.delete(m.ref));
+                                    await msgBatch.commit();
+                                }
+                            }
                         }
                         batch.delete(docSnap.ref);
                     }
                     await batch.commit();
+                    console.log(`  Processed batch ending at ${Math.min(i + batchSize, snapshot.docs.length)}/${snapshot.docs.length}`);
                 }
-                console.log(`Cleared collection: ${collName}`);
+                console.log(`Finished clearing: ${collName}`);
             }
 
             // 2. Clear users (except current admin)
+            console.log("Clearing users...");
             const usersSnap = await getDocs(collection(db, 'users'));
-            const userBatch = writeBatch(db);
+            const batchSize = 500;
             let deletedUsers = 0;
 
-            for (const uDoc of usersSnap.docs) {
-                const userData = uDoc.data();
-                // Protect current admin and any user with role 'admin' or the master email
-                if (uDoc.id !== user?.uid && userData.role !== 'admin' && userData.email !== 'btechtools.ng@gmail.com') {
-                    userBatch.delete(uDoc.ref);
-                    deletedUsers++;
+            for (let i = 0; i < usersSnap.docs.length; i += batchSize) {
+                const userBatch = writeBatch(db);
+                const chunk = usersSnap.docs.slice(i, i + batchSize);
+                let batchOps = 0;
+
+                for (const uDoc of chunk) {
+                    const userData = uDoc.data();
+                    // Protect current admin and any user with role 'admin' or the master email
+                    const isAdminUser = uDoc.id === user?.uid || userData.role === 'admin' || userData.email === 'btechtools.ng@gmail.com';
+                    
+                    if (!isAdminUser) {
+                        userBatch.delete(uDoc.ref);
+                        deletedUsers++;
+                        batchOps++;
+                    }
                 }
+                
+                if (batchOps > 0) {
+                    await userBatch.commit();
+                }
+                console.log(`  Processed user batch ending at ${Math.min(i + batchSize, usersSnap.docs.length)}/${usersSnap.docs.length}`);
             }
-            await userBatch.commit();
             console.log(`Cleared ${deletedUsers} users.`);
 
             alert("System reset successful. All user data wiped. Platform is now in a fresh state.");
