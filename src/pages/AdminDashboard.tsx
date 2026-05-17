@@ -209,7 +209,7 @@ export const AdminDashboard: React.FC = () => {
                 <Logo />
                 <button onClick={() => setIsSidebarOpen(false)}><X className="w-6 h-6"/></button>
               </div>
-              <nav className="flex flex-col gap-2">
+              <nav className="flex flex-col gap-1 mt-2 overflow-y-auto max-h-[calc(100vh-200px)] pr-2 scrollbar-hide">
                 <SidebarLink active={activeTab === 'overview'} icon={<BarChart3 className="w-5 h-5"/>} label="Overview" onClick={() => { setActiveTab('overview'); setIsSidebarOpen(false); }} />
                 <SidebarLink active={activeTab === 'users'} icon={<Users className="w-5 h-5"/>} label="Users" onClick={() => { setActiveTab('users'); setIsSidebarOpen(false); }} />
                 <SidebarLink active={activeTab === 'plans'} icon={<ReceiptText className="w-5 h-5"/>} label="Plans" onClick={() => { setActiveTab('plans'); setIsSidebarOpen(false); }} />
@@ -527,7 +527,7 @@ const StatsCard = ({ label, value, icon, color }: { label: string, value: string
     </div>
     <div className="flex flex-col">
       <span className="text-[10px] uppercase font-black tracking-widest text-gray-500 mb-1">{label}</span>
-      <span className="text-4xl font-mono font-bold tracking-tighter">{value}</span>
+      <span className="text-3xl sm:text-4xl font-mono font-bold tracking-tighter break-all">{value}</span>
     </div>
   </div>
 );

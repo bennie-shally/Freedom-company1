@@ -123,7 +123,7 @@ export const Dashboard: React.FC = () => {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative group h-72 overflow-hidden rounded-[3rem] shadow-2xl"
+        className="relative group min-h-[280px] h-auto overflow-hidden rounded-[2.5rem] sm:rounded-[3rem] shadow-2xl flex flex-col"
       >
         <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-950" />
         
@@ -134,7 +134,7 @@ export const Dashboard: React.FC = () => {
         <div className="absolute -top-20 -right-20 w-64 h-64 bg-blue-400/20 rounded-full blur-[100px]" />
         <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-indigo-500/30 rounded-full blur-[100px]" />
         
-        <div className="relative h-full flex flex-col justify-between p-10">
+        <div className="relative flex-1 flex flex-col justify-between p-7 sm:p-10">
           <div className="flex justify-between items-start">
             <div className="p-4 bg-white/10 backdrop-blur-xl rounded-[1.25rem] border border-white/20 shadow-xl">
               <ShieldCheck className="w-6 h-6 text-white" />
@@ -145,9 +145,9 @@ export const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <p className="text-[10px] font-black uppercase tracking-[0.5em] text-white/50">Available Funds</p>
-            <h2 className="text-5xl xs:text-6xl font-black text-white tracking-tighter drop-shadow-lg">
+          <div className="space-y-1">
+            <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.4em] text-white/50 leading-none">Available Funds</p>
+            <h2 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl font-black text-white tracking-tighter drop-shadow-lg break-all leading-tight">
               {formatCurrency(userData.balance)}
             </h2>
           </div>
@@ -219,27 +219,27 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* Stats Mini Grid */}
-      <div className="grid grid-cols-2 gap-5">
-        <div className="bg-white/5 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/5 flex flex-col gap-4 relative overflow-hidden group shadow-lg">
+      <div className="grid grid-cols-2 gap-3 sm:gap-5">
+        <div className="bg-white/5 backdrop-blur-md p-5 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-white/5 flex flex-col gap-3 sm:gap-4 relative overflow-hidden group shadow-lg">
           <div className="absolute -top-12 -right-12 w-32 h-32 bg-emerald-500/5 blur-3xl group-hover:bg-emerald-500/15 transition-all duration-500" />
-          <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/10">
-             <TrendingUp className="w-6 h-6" />
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/10">
+             <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] uppercase font-black tracking-[0.4em] text-slate-500">Cumulative Returns</span>
-            <span className="text-2xl font-black text-white tracking-tighter">{formatCurrency(userData.totalEarnings)}</span>
-            <span className="text-[8px] text-emerald-400 font-black uppercase tracking-widest mt-1">Validated Growth</span>
+          <div className="flex flex-col gap-0.5 sm:gap-1">
+            <span className="text-[8px] sm:text-[10px] uppercase font-black tracking-[0.2em] sm:tracking-[0.4em] text-slate-500">Total Returns</span>
+            <span className="text-lg sm:text-2xl font-black text-white tracking-tighter truncate">{formatCurrency(userData.totalEarnings)}</span>
+            <span className="text-[7px] sm:text-[8px] text-emerald-400 font-black uppercase tracking-widest mt-0.5 sm:mt-1">Validated</span>
           </div>
         </div>
-        <div className="bg-white/5 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/5 flex flex-col gap-4 relative overflow-hidden group shadow-lg">
+        <div className="bg-white/5 backdrop-blur-md p-5 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-white/5 flex flex-col gap-3 sm:gap-4 relative overflow-hidden group shadow-lg">
           <div className="absolute -top-12 -right-12 w-32 h-32 bg-blue-500/5 blur-3xl group-hover:bg-blue-500/15 transition-all duration-500" />
-          <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/10">
-             <Clock className="w-6 h-6" />
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/10">
+             <Clock className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] uppercase font-black tracking-[0.4em] text-slate-500">Active Nodes</span>
-            <span className="text-2xl font-black text-white tracking-tighter">{activeInvestments.length} <span className="text-sm font-black text-blue-400/50 italic opacity-50 ml-1">UNITS</span></span>
-            <span className="text-[8px] text-blue-400 font-black uppercase tracking-widest mt-1">Uptime: 99.9%</span>
+          <div className="flex flex-col gap-0.5 sm:gap-1">
+            <span className="text-[8px] sm:text-[10px] uppercase font-black tracking-[0.2em] sm:tracking-[0.4em] text-slate-500">Active Nodes</span>
+            <span className="text-xl sm:text-2xl font-black text-white tracking-tighter">{activeInvestments.length} <span className="text-[10px] sm:text-sm font-black text-blue-400/50 italic opacity-50 ml-0.5 sm:ml-1">UNITS</span></span>
+            <span className="text-[7px] sm:text-[8px] text-blue-400 font-black uppercase tracking-widest mt-0.5 sm:mt-1">Uptime: 99.9%</span>
           </div>
         </div>
       </div>
@@ -332,19 +332,19 @@ const MenuIcon = ({ emoji, label, onClick }: { emoji: string, label: string, onC
 );
 
 const PayoutItem = ({ user, amount }: { user: string, amount: string }) => (
-  <div className="flex justify-between items-center bg-[#0C121D] p-4 rounded-2xl border border-white/5 shadow-inner group">
-    <div className="flex items-center gap-3">
-      <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-[10px]">
+  <div className="flex justify-between items-center bg-[#0C121D] p-3 sm:p-4 rounded-2xl border border-white/5 shadow-inner group">
+    <div className="flex items-center gap-2 sm:gap-3">
+      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-[8px] sm:text-[10px]">
         ✅
       </div>
       <div className="flex flex-col">
-        <span className="text-[10px] text-white font-black tracking-tight">{user}</span>
-        <span className="text-[8px] text-slate-600 font-bold uppercase tracking-widest">Withdrawal Successful</span>
+        <span className="text-[9px] sm:text-[10px] text-white font-black tracking-tight">{user}</span>
+        <span className="text-[7px] sm:text-[8px] text-slate-600 font-bold uppercase tracking-widest">Withdrawal Success</span>
       </div>
     </div>
     <div className="flex flex-col items-end">
-      <span className="text-emerald-400 font-black text-xs">+{amount}</span>
-      <span className="text-[8px] text-emerald-500/50 font-black uppercase tracking-tighter">via GCash</span>
+      <span className="text-emerald-400 font-black text-[10px] sm:text-xs">+{amount}</span>
+      <span className="text-[7px] sm:text-[8px] text-emerald-500/50 font-black uppercase tracking-tighter">via GCash</span>
     </div>
   </div>
 );

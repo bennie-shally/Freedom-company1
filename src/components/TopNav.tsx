@@ -36,9 +36,9 @@ export const TopNav: React.FC = () => {
 
       <div className="flex items-center gap-4">
         {userData && (
-          <div className="flex flex-col items-end">
-            <span className="text-[7px] text-slate-500 uppercase font-black tracking-[0.3em] leading-none mb-1">Available Balance</span>
-            <span className="text-sm font-black text-white italic tracking-tighter leading-none">{formatCurrency(userData.balance)}</span>
+          <div className="flex flex-col items-end max-w-[100px] sm:max-w-none">
+            <span className="text-[7px] text-slate-500 uppercase font-black tracking-[0.3em] leading-none mb-1">Balance</span>
+            <span className="text-[11px] sm:text-sm font-black text-white italic tracking-tighter leading-none truncate w-full text-right">{formatCurrency(userData.balance)}</span>
           </div>
         )}
         <button 
@@ -79,7 +79,7 @@ export const TopNav: React.FC = () => {
                 </button>
               </div>
 
-              <div className="flex flex-col gap-1 mt-2">
+              <div className="flex flex-col gap-1 mt-2 overflow-y-auto max-h-[calc(100vh-250px)] pr-2 scrollbar-hide">
                 <MenuLink to="/dashboard" active={location.pathname === '/dashboard'} icon={<TrendingUp className="h-4 w-4" />} label="Dashboard" onClick={() => setIsOpen(false)} />
                 <MenuLink to="/deposit" active={location.pathname === '/deposit'} icon={<Wallet className="h-4 w-4" />} label="Deposit" onClick={() => setIsOpen(false)} />
                 <MenuLink to="/withdraw" active={location.pathname === '/withdraw'} icon={<ReceiptText className="h-4 w-4" />} label="Withdraw" onClick={() => setIsOpen(false)} />
@@ -90,12 +90,12 @@ export const TopNav: React.FC = () => {
                 <MenuLink to="/chat" active={location.pathname === '/chat'} icon={<MessageSquare className="h-4 w-4" />} label="Support" onClick={() => setIsOpen(false)} />
               </div>
 
-              <div className="mt-auto pb-4">
+              <div className="mt-auto pb-4 pt-2 border-t border-white/5">
                 <button
                   onClick={handleLogout}
                   className="flex items-center gap-3 text-red-500 font-black uppercase tracking-widest text-[9px] w-full p-4 bg-red-500/5 hover:bg-red-500/10 border border-red-500/10 rounded-2xl transition-all"
                 >
-                  <LogOut className="h-4 h-4" />
+                  <LogOut className="h-4 w-4" />
                   Logout
                 </button>
               </div>
