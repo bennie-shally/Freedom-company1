@@ -7,6 +7,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Layout } from './components/Layout';
+import { ScrollToTop } from './components/ScrollToTop';
 
 // Pages
 import { LandingPage } from './pages/LandingPage';
@@ -39,6 +40,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AuthProvider>
         <Routes>
           <Route element={<Layout />}>
