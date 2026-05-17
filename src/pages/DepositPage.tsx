@@ -13,6 +13,7 @@ import { Wallet, Copy, Upload, CheckCircle2, AlertCircle } from 'lucide-react';
 import { formatCurrency } from '../lib/utils';
 import { SystemSettings } from '../types';
 import { handleFirestoreError, OperationType } from '../lib/errorHandlers';
+import { GcashLogo } from '../components/GcashLogo';
 
 export const DepositPage: React.FC = () => {
   const { user, userData } = useAuth();
@@ -123,10 +124,10 @@ export const DepositPage: React.FC = () => {
            <div className="h-px flex-1 bg-white/5" />
         </div>
         
-        <div className="bg-[#121212] border border-white/5 rounded-[2.5rem] p-8 space-y-8 backdrop-blur-xl">
+        <div className="bg-[#121212] border border-white/5 rounded-[2.5rem] p-8 space-y-8 backdrop-blur-xl group">
           <div className="flex justify-between items-center">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/GCash_logo.svg/1024px-GCash_logo.svg.png" alt="GCash" className="h-4 brightness-0 invert opacity-70" />
-            <span className="px-3 py-1 bg-blue-500/10 text-blue-400 rounded-lg text-[8px] font-black uppercase tracking-widest border border-blue-500/20">Active GCash</span>
+            <GcashLogo />
+            <span className="px-3 py-1 bg-blue-500/10 text-blue-400 rounded-lg text-[8px] font-black uppercase tracking-widest border border-blue-500/20">Active Gateway</span>
           </div>
 
           <div className="grid gap-4">
